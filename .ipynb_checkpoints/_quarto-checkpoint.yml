@@ -12,7 +12,7 @@ website:
         href: https://github.com/
       - icon: twitter
         href: https://twitter.com
-    background: secondary
+    background: primary
     search: true
     left:
       - text: "Home"
@@ -23,7 +23,7 @@ website:
         
 format:
   html:
-    theme: cosmo
+    theme: united
     css: styles.css
 
 
