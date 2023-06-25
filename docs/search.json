@@ -4,7 +4,7 @@
     "href": "posts/basic-statutory-expert-system/index.html",
     "title": "A basic statutory expert system",
     "section": "",
-    "text": "Summary\nDespite advances in generative AI, expert legal systems will continue to be necessary for legal tech and its applications. I plan to address the rationale behind this assumption in a later post. But for now, I will lay out a simple and intuitively-coded expert system that addresses a specific and basic legal problem.\n\n\n\n\nflowchart TD\n  A[Hard edge] --&gt; B(Round edge)\n  B --&gt; C{Decision}\n  C --&gt; D[Result one]\n  C --&gt; E[Result two]\n\n\n\n\n\n\n\nAI disclaimer\nI’ve used the following AI tools to help create this project:\n\nSpelling and grammar. Grammarly\nText summarization. ChatGPT-3.5 & 4\nCode. ChatGPT-3.5 & 4, GitHub Copilot (GPT-3.5 based)\nLegal research. CanLII\nImages. DALL-E"
+    "text": "Despite advances in generative AI, expert legal systems will continue to be necessary for legal tech and its applications. I plan to address the rationale behind this assumption in a later post. But for now, I will lay out a simple and intuitively-coded expert system that addresses a specific and basic legal problem.\n\n\nThere are several key advantages to working with an offence like high treason:\n\nMinimal statutory elements.\nFew conditional layers.\nUnderlitigated. Although all Canadian criminal offences begin as codified statutes, most accumulate greater complexity as they’re litigated in court. Questions about what certain words mean in certain circumstances are ones that are dealt with in court, and very often add dozens of conditions to one or more of the basic elemental steps.\n\nA straightforward and underlitigated offence like high treason is the perfect start for this project."
   },
   {
     "objectID": "index.html",
@@ -32,6 +32,48 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "I’m a staff lawyer with Legal Aid Saskatchewan based out of Swift Current. All work and opinions expressed on this site are mine, and not necessarily (or impliedly) my employer’s."
+    "text": "I’m a staff lawyer with Legal Aid Saskatchewan practicing criminal defence out of Swift Current, Sask. All work and opinions expressed on this site are mine and not necessarily (or impliedly) my employer’s."
+  },
+  {
+    "objectID": "posts/basic-statutory-expert-system/index.html#facts.py",
+    "href": "posts/basic-statutory-expert-system/index.html#facts.py",
+    "title": "[notebook] Criminal Code s 46 expert system example",
+    "section": "facts.py",
+    "text": "facts.py"
+  },
+  {
+    "objectID": "posts/basic-statutory-expert-system/index.html#main.py",
+    "href": "posts/basic-statutory-expert-system/index.html#main.py",
+    "title": "[notebook] Criminal Code s 46 expert system example",
+    "section": "main.py",
+    "text": "main.py\nThis function executes the program. It creates a Facts object by canvassing the minimum number of questions for the offence’s factual matrix. Once created, Facts is passed to the rules set which returns the final result.\nThe function is limited to high treason as defined in Criminal Code s 46, and thus has this rule set coded into tthe function. Future versions should modularize this rule set call."
+  },
+  {
+    "objectID": "posts/basic-statutory-expert-system/high_treason_expert_system.html",
+    "href": "posts/basic-statutory-expert-system/high_treason_expert_system.html",
+    "title": "[notebook] Criminal Code s 46 expert system example",
+    "section": "",
+    "text": "HIGH_TREASON_RULES = {\n    \"sovereign\": [(\"Did the defendant kill the sovereign?\",\n                   [\"kill\"]),\n                  (\"Did the defendant attempt to kill the sovereign?\",\n                   [\"kill\", \"attempt\"]),\n                  (\"Did the defendant do bodily harm to the sovereign tending to death?\",\n                   [\"bodily harm\", \"tending to death\"]),\n                  (\"Did the defendant do bodily harm to the sovereign tending to destruction?\",\n                   [\"bodily harm\", \"tending to destruction\"]),\n                  (\"Did the defendant maim the sovereign?\",\n                   [\"maim\"]),\n                  (\"Did the defendant wound the sovereign?\",\n                   [\"wound\"]),\n                  (\"Did the defendant imprison the sovereign?\",\n                   [\"imprison\"]),\n                  (\"Did the defendant restrain the sovereign?\",\n                   [\"restrain\"])],\n    \"canada\": [(\"Did the defendant levy war against Canada?\",\n                [\"levy war\"]),\n               (\"Did the defendant prepare to levy war against Canada?\",\n                [\"prepare\", \"levy war\"]),\n               (\"Did the defendant assist an enemy at war with Canada?\",\n                [\"assist warring enemy\"]),\n               (\"Did the defendant assist an armed force hostily engaged with Canadian Forces?\",\n                [\"assist hostile force\"])]}"
+  },
+  {
+    "objectID": "posts/basic-statutory-expert-system/high_treason_expert_system.html#facts.py",
+    "href": "posts/basic-statutory-expert-system/high_treason_expert_system.html#facts.py",
+    "title": "[notebook] Criminal Code s 46 expert system example",
+    "section": "facts.py",
+    "text": "facts.py"
+  },
+  {
+    "objectID": "posts/basic-statutory-expert-system/high_treason_expert_system.html#main.py",
+    "href": "posts/basic-statutory-expert-system/high_treason_expert_system.html#main.py",
+    "title": "[notebook] Criminal Code s 46 expert system example",
+    "section": "main.py",
+    "text": "main.py\nThis function executes the program. It creates a Facts object by canvassing the minimum number of questions for the offence’s factual matrix. Once created, Facts is passed to the rules set which returns the final result.\nThe function is limited to high treason as defined in Criminal Code s 46, and thus has this rule set coded into tthe function. Future versions should modularize this rule set call.\n\nfrom facts import high_treason_facts\nfrom rules import high_treason_rules\nfrom models import Facts, Complainant\nfrom input_correction import standardize_sovereign_names, standardize_canada_names\n\n\ndef create_facts():\n    \"\"\"\n    Creates a Facts object that can then be read using the rule base.\n    \"\"\"\n\n    print(\"Please enter the facts of the case:\")\n\n    victim_name = input(\"Who is the victim? \")\n    victim_name = standardize_sovereign_names(victim_name)\n    victim_name = standardize_canada_names(victim_name)\n    complainant = Complainant(victim_name)\n\n    offence_date = input(\"Date of the offence (YYYY-MM-DD): \")\n    jurisdiction = input(\"Jurisdiction: \")\n\n    actions = high_treason_facts(victim_name)\n\n    return Facts(complainant.name, offence_date, jurisdiction, actions)\n\nfacts = create_facts()\n\nif high_treason_rules(facts):\n    print(\"High treason committed.\")\nelse:\n    print(\"No offence detected.\")"
+  },
+  {
+    "objectID": "posts/basic-statutory-expert-system/index.html#why-high-treason",
+    "href": "posts/basic-statutory-expert-system/index.html#why-high-treason",
+    "title": "A basic statutory expert system",
+    "section": "",
+    "text": "There are several key advantages to working with an offence like high treason:\n\nMinimal statutory elements.\nFew conditional layers.\nUnderlitigated. Although all Canadian criminal offences begin as codified statutes, most accumulate greater complexity as they’re litigated in court. Questions about what certain words mean in certain circumstances are ones that are dealt with in court, and very often add dozens of conditions to one or more of the basic elemental steps.\n\nA straightforward and underlitigated offence like high treason is the perfect start for this project."
   }
 ]

@@ -10,20 +10,56 @@ image: "ai.png"
 
 Despite advances in generative AI, expert legal systems will continue to be necessary for legal tech and its applications. I plan to address the rationale behind this assumption in a later post. But for now, I will lay out a simple and intuitively-coded expert system that addresses a specific and basic legal problem.
 
+## Why high treason?
+
+There are several key advantages to working with an offence like high treason:
+
+* **Minimal statutory elements.** 
+* **Few conditional layers.**
+* **Underlitigated.** Although all Canadian criminal offences begin as codified statutes, most accumulate greater complexity as they're litigated in court. Questions about what certain words mean in certain circumstances are ones that are dealt with in court, and very often add dozens of conditions to one or more of the basic elemental steps.
+
+A straightforward and underlitigated offence like high treason is the perfect start for this project. 
+
+# Control flow
+
+A very simple statutory expert system implementation is a conditional sequence that mimics a decision tree. 
+
 ```{mermaid}
 flowchart TD
-  A[Hard edge] --> B(Round edge)
-  B --> C{Decision}
-  C --> D[Result one]
-  C --> E[Result two]
+    B[Is the defendant guilty of high treason?] --> C{Who is the complainant}
+    C --> D[The Sovereign]
+    C --> F[Neither]
+    C --> E[Canada]
+    F --> G1[Not guilty]
+    E --> H["Did the defendant
+    • Levy war against the complainant
+    • Prepare to levy war against the complainant
+    • Assist an enemy at war with the complainant
+    • Assist a hostile armed force engaged with the complainant"]
+    H -->|Yes| I1[Guilty]
+    H -->|No| G
+    D --> J["Did the defendant: 
+    • Kill the sovereign
+    • Attempt to kill the soveregin
+    • Inflict bodily harm tending to cause death on the sovereign
+    • Inflict bodily harm tending to cause destruction on the sovereign
+    • Maim the sovereing
+    • Wound the sovereign
+    • Imprison the sovereign
+    • Restrain the sovereign"]
+    J -->|Yes| I2[Guilty]
+    J -->|No| G2[Not guilty]
 ```
+_Figure 1_: An ugly flowchart describing the basic expert system's flow control
+
+
 
 # AI disclaimer
 
 I've used the following AI tools to help create this project:
 
-* **Spelling and grammar.** Grammarly
+* **Spelling and grammar.** Grammarly (non-generative)
 * **Text summarization.** ChatGPT-3.5 & 4
 * **Code.** ChatGPT-3.5 & 4, GitHub Copilot (GPT-3.5 based)
-* **Legal research.** CanLII
+* **Legal research.** CanLII (non-generative)
 * **Images.** DALL-E
