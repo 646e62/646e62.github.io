@@ -69,7 +69,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -125,8 +125,9 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">A basic statutory expert system</h1>
+      <h1 class="title">[notebook] <em>Criminal Code</em> s 46 expert system example</h1>
                                 <div class="quarto-categories">
+                <div class="quarto-category">article</div>
                 <div class="quarto-category">code</div>
                 <div class="quarto-category">analysis</div>
               </div>
@@ -153,69 +154,144 @@ ul.task-list li input[type="checkbox"] {
       
     </div>
     
+  <div>
+    <div class="abstract">
+      <div class="abstract-title">Abstract</div>
+      Despite advances in generative AI, expert legal systems will continue to be necessary for legal tech and its applications. These systems can anticipate the hallucinations that generative AIs produce, guide them by prompting them along a control flow, and easily expose the logic underlying a legal AI’s decision. In this post I outline a simple and intuitively-coded expert system that addresses, at a very high level, a narrow, basic legal problem: whether a criminal defendant is guilty of high treason.
+    </div>
+  </div>
   
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    <div class="quarto-alternate-notebooks"><h2>Notebooks</h2><ul><li><a href="../../notebooks/high_treason_expert_system.ipynb.html"><i class="bi bi-journal-code"></i>high_treason_expert_system.ipynb</a></li></ul></div></div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
 
-<section id="summary" class="level1">
-<h1>Summary</h1>
-<p>Despite advances in generative AI, expert legal systems will continue to be necessary for legal tech and its applications. I plan to address the rationale behind this assumption in a later post. But for now, I will lay out a simple and intuitively-coded expert system that addresses a specific and basic legal problem.</p>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>When reading up on legal tech’s intersections with AI and expert systems, researchers and writers frequently mention Robert Kowalski, Fariba Sadri, and Marek Sogot’s paper “The British Nationality Act as a Logic Program”<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> as a black swan event in legal AI.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> Their paper outlined an expert legal system the authors designed and coded in Prolog. Reading through their report, it seemed that a Python program could produce similar results. This little project aims to do that, starting with a simple statutory example.</p>
+</section>
+<section id="high-treason" class="level1">
+<h1>High treason</h1>
+<section id="what-is-high-treason" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-high-treason">What is high treason?</h2>
+<p>High treason is a criminal offence created by section 46(1) of the Canadian <em>Criminal Code</em>. When I wrote this post, the offence read as follows:</p>
+<blockquote class="blockquote">
+<p><strong>High treason</strong></p>
+<p><strong>46 (1)</strong> Every one commits high treason who, in Canada,</p>
+<ol type="a">
+<li><p>kills or attempts to kill Her Majesty, or does her any bodily harm tending to death or destruction, maims or wounds her, or imprisons or restrains her;</p></li>
+<li><p>levies war against Canada or does any act preparatory thereto; or</p></li>
+<li><p>assists an enemy at war with Canada, or any armed forces against whom Canadian Forces are engaged in hostilities, whether or not a state of war exists between Canada and the country whose forces they are.</p></li>
+</ol>
+</blockquote>
+<p>Although treason has been a codified criminal offence since the <em>Criminal Code, 1892</em>, the distinction between <em>treason</em> and <em>high treason</em> is relatively recent. Before Parliament made significant amendments to the <em>Criminal Code</em> in the 1970s, treason and high treason were a single, albeit multi-faceted, codified offence.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> Historically, treason was one of three offences punishable by death,<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> and remains one of the most severe offences in Canadian criminal law.</p>
+</section>
 <section id="why-high-treason" class="level2">
 <h2 class="anchored" data-anchor-id="why-high-treason">Why high treason?</h2>
 <p>There are several key advantages to working with an offence like high treason:</p>
 <ul>
-<li><strong>Minimal statutory elements.</strong></li>
-<li><strong>Few conditional layers.</strong></li>
-<li><strong>Underlitigated.</strong> Although all Canadian criminal offences begin as codified statutes, most accumulate greater complexity as they’re litigated in court. Questions about what certain words mean in certain circumstances are ones that are dealt with in court, and very often add dozens of conditions to one or more of the basic elemental steps.</li>
+<li><strong>Minimal statutory elements.</strong> <em>Criminal Code</em> s 46 contains a reasonably straightforward control flow with only a few possible outcomes each time the program asks the user to choose between options.</li>
+<li><strong>Few conditional layers.</strong> High treason’s decision tree only contains a few conditional layers. At most, the user must make two decisions before reaching a result and can arrive at a result after as few as one decision. This conditional superficiality makes high treason easy to diagram and demonstrates some basic expert legal system fundamentals.</li>
+<li><strong>Underlitigated.</strong> Although all Canadian criminal offences begin as codified statutes, most accumulate greater complexity through litigation. Courts ask and answer what certain words mean in certain circumstances and often add dozens of conditions to one or more basic elemental steps. High treason is a relatively recently created and infrequently charged offence, with few (if any) reported cases turning up in any of the usual repositories. Infrequently charged offences are, by necessity, rarely judicially considered. This infrequency limits the degree to which the statute can be interpretively bifurcated and grow more complex.</li>
+<li><strong>Highly integrated.</strong> Despite not appearing much in reported case decisions, high treason is a serious offence that attracts special consideration throughout the <em>Criminal Code</em>, such as punishment availability, mandatory trial procedures, evidentiary prerequisites, jurisdictional nuances, etc. These conditions require the basic expert system I develop here to remain extensible to these future inputs.</li>
 </ul>
-<p>A straightforward and underlitigated offence like high treason is the perfect start for this project.</p>
+<p>High treason’s relative conceptual simplicity makes it an ideal offence to begin development. It is sufficiently complex to allow me to experiment with navigating control points while being straightforward enough to be captured by an automated expert system that answers a simple legal question.</p>
+</section>
+<section id="the-projects-scope" class="level2">
+<h2 class="anchored" data-anchor-id="the-projects-scope">The project’s scope</h2>
+<p>This project’s goal is to encapsulate high treason within an expert legal system fully. The project must account for the punishment, procedural, and jurisdictional components discussed above to be considered complete. But to start, I will represent high treason’s offence section at a high level. Once the basic control flow is outlined and codified, it can be made more extensible and further developed to incorporate these additional components.</p>
 </section>
 </section>
-<section id="control-flow" class="level1">
-<h1>Control flow</h1>
-<p>A very simple statutory expert system implementation is a conditional sequence that mimics a decision tree.</p>
+<section id="elementary-control-flow" class="level1">
+<h1>Elementary control flow</h1>
+<p>One way of describing this high-level view is as an “elementary control flow” representation. By “elementary,” I mean it represents the offence’s essential elements.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> By “control flow,” I refer to the decision trees commonly used in computer science and juridical reasoning.</p>
+<section id="high-treasons-elements" class="level2">
+<h2 class="anchored" data-anchor-id="high-treasons-elements">High treason’s elements</h2>
+<p><em>Criminal Code</em> s 46(1)’s wording describes the following offence elements:</p>
+<ol type="1">
+<li>The offence took place in Canada; AND</li>
+<li>Where the complainant is the sovereign, the defendant:</li>
+</ol>
+<ol type="a">
+<li>Killed the sovereign; OR</li>
+<li>Attempted to kill the sovereign; OR</li>
+<li>Caused the sovereign bodily harm tending to cause i. Death; OR ii. Destruction; OR</li>
+<li>Maims the sovereign; OR</li>
+<li>Wounds the sovereign; OR</li>
+<li>Imprisons the sovereign; OR</li>
+<li>Restrains the sovereign; OR</li>
+</ol>
+<ol start="3" type="1">
+<li>Where the complainant is Canada, the defendant:</li>
+</ol>
+<ol type="a">
+<li>Levied war against Canada; OR</li>
+<li>Prepared to levy war against Canada; OR</li>
+<li>Assists an enemy at war with Canada; OR</li>
+<li>Assists an armed force engaged in hostilities with Canada.</li>
+</ol>
+<p>Where none of these conditions obtain, the defendant did not commit high treason.</p>
+</section>
+<section id="high-treasons-elements-as-a-flowchart" class="level2">
+<h2 class="anchored" data-anchor-id="high-treasons-elements-as-a-flowchart">High treason’s elements as a flowchart</h2>
+<p>These elements can also be represented as follows:</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <div>
 <pre class="mermaid mermaid-js">flowchart TD
-    B[Is the defendant guilty of high treason?] --&gt; C{Who is the complainant}
-    C --&gt; D[The Sovereign]
-    C --&gt; F[Neither]
+    A[Did the defendant commit high treason?] --&gt; B1{The act took place in Canada}
+    B1 --&gt;|No| B2(Not guilty)
+    B1 --&gt;|Yes| C{Who is the complainant}
+    C --&gt; D[The sovereign]
     C --&gt; E[Canada]
-    F --&gt; G1[Not guilty]
-    E --&gt; H["Did the defendant
-    • Levy war against the complainant
-    • Prepare to levy war against the complainant
-    • Assist an enemy at war with the complainant
-    • Assist a hostile armed force engaged with the complainant"]
-    H --&gt;|Yes| I1[Guilty]
-    H --&gt;|No| G
-    D --&gt; J["Did the defendant: 
-    • Kill the sovereign
-    • Attempt to kill the soveregin
-    • Inflict bodily harm tending to cause death on the sovereign
-    • Inflict bodily harm tending to cause destruction on the sovereign
-    • Maim the sovereing
-    • Wound the sovereign
-    • Imprison the sovereign
-    • Restrain the sovereign"]
-    J --&gt;|Yes| I2[Guilty]
-    J --&gt;|No| G2[Not guilty]
+    C --&gt; F["¬(The sovereign ∨ Canada)"]
+    F --&gt; G(Not guilty)
+    E --&gt; H0{Did the defendant}
+    H0 --&gt; H1[Levy war against Canada]
+    H1 --&gt;|"∨"| H2[Prepare to levy war against Canada]
+    H2 --&gt;|"∨"| H3[Assist an enemy at war with Canada]
+    H3 --&gt;|"∨"| H4[Assist a hostile armed force engaged with Canada]
+    H4 --&gt;|Yes| I1(Guilty)
+    H4 --&gt;|No| I2(Not guilty)
+    D --&gt; J0{Did the defendant}
+    J0 --&gt; J1[Kill the sovereign]
+    J1 --&gt;|"∨"| J2[Attempt to kill the sovereign]
+    J2 --&gt;|"∨"| J3[Do bodily harm to the sovereign tending to cause death]
+    J3 --&gt;|"∨"| J4[Do bodily harm to the sovereign tending to cause destruction]
+    J4 --&gt;|"∨"| J5[Maim the sovereign]
+    J5 --&gt;|"∨"| J6[Wound the sovereign]
+    J6 --&gt;|"∨"| J7[Imprison the sovereign]
+    J7 --&gt;|"∨"| J8[Restrain the sovereign]
+    J8 --&gt;|Yes| K1(Guilty)
+    J8 --&gt;|No| K2(Not guilty)
 </pre>
 </div>
 </div>
 </div>
 </div>
 <p><em>Figure 1</em>: An ugly flowchart describing the basic expert system’s flow control</p>
+<p>Viewed this way, it is apparent how this decision tree might be easily adapted into a Python script that can, at a high level with sufficient and reliable information, decide whether a defendant committed high treason.</p>
 </section>
+</section>
+<section id="program-flow" class="level1 quarto-embed-nb-cell">
+<h1>Program flow</h1>
+<section id="facts.py" class="level2">
+<h2 class="anchored" data-anchor-id="facts.py">facts.py</h2>
+</section>
+<section id="main.py" class="level2">
+<h2 class="anchored" data-anchor-id="main.py">main.py</h2>
+<p>This function executes the program. It creates a Facts object by canvassing the minimum number of questions for the offence’s factual matrix. Once created, Facts is passed to the rules set which returns the final result.</p>
+<p>The function is limited to high treason as defined in <em>Criminal Code</em> s 46, and thus has this rule set coded into tthe function. Future versions should modularize this rule set call.</p>
+</section>
+<a class="quarto-notebook-link" id="nblink-1" href="../../notebooks/high_treason_expert_system.ipynb.html">Source: high_treason_expert_system.ipynb</a></section>
 <section id="ai-disclaimer" class="level1">
 <h1>AI disclaimer</h1>
 <p>I’ve used the following AI tools to help create this project:</p>
@@ -230,7 +306,17 @@ ul.task-list li input[type="checkbox"] {
 
 </section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>See <a href="http://www.doc.ic.ac.uk/~rak/papers/British%20Nationality%20Act.pdf" class="uri">http://www.doc.ic.ac.uk/~rak/papers/British%20Nationality%20Act.pdf</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>See e.g.&nbsp;<a href="https://lance-eliot.medium.com/ai-law-british-nationality-act-unexpectedly-spurred-ai-and-law-404aea03386a">AI &amp; Law: British Nationality Act Unexpectedly Spurred AI And Law</a>, <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3975784">How the British Nationality Act Served to Inadvertently Spur AI and the Law</a>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Compare <em>Criminal Code, 1952</em> s 46(1) with Aidan R. Vining, “Reforming Canadian Sentencing Practices: Problems, Prospects and Lessons” (1979) 17:2 Osgoode Hall L J 355 at note 116.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>The other historically capital offences were murder and rape.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>See e.g.&nbsp;<a href="https://en.wikibooks.org/wiki/Canadian_Criminal_Law/Proof_of_Elements" class="uri">https://en.wikibooks.org/wiki/Canadian_Criminal_Law/Proof_of_Elements</a><a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

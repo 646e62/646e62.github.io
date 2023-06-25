@@ -6,11 +6,13 @@ about:
   links:
     - icon: linkedin
       text: LinkedIn
-      href: https://linkedin.com
+      href: https://www.linkedin.com/in/daniel-booy/
     - icon: github
       text: Github
       href: https://github.com
 
 ---
 
-I'm a staff lawyer with Legal Aid Saskatchewan based out of Swift Current. All work and opinions expressed on this site are mine, and not necessarily (or impliedly) my employer's. 
+## Daniel Booy
+
+I'm a staff lawyer with Legal Aid Saskatchewan practicing criminal defence out of Swift Current, Sask. All work and opinions expressed on this site are mine, and not necessarily (or impliedly) my employer's. 
