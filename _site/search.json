@@ -1,0 +1,44 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "I’m a staff lawyer with Legal Aid Saskatchewan based out of Swift Current. All work and opinions expressed on this site are mine, and not necessarily (or impliedly) my employer’s."
+  },
+  {
+    "objectID": "posts/welcome/index.html",
+    "href": "posts/welcome/index.html",
+    "title": "TODO",
+    "section": "",
+    "text": "Items that need attention sooner than later.\n\n\n\nSinclair\nImmigration\nNolo contendere"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "legal informatics",
+    "section": "",
+    "text": "A basic statutory expert system\n\n\n\n\n\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\n\n\nJun 24, 2023\n\n\nDaniel Booy\n\n\n\n\n\n\n  \n\n\n\n\nTODO\n\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\n\n\nJun 21, 2023\n\n\nDaniel Booy\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/post-with-code/index.html",
+    "href": "posts/post-with-code/index.html",
+    "title": "A basic statutory expert system",
+    "section": "",
+    "text": "Summary\nDespite advances in generative AI, I expect that expert legal systems will continue to be necessary. I will try to address the rationale behind this assumption in a later post, but fot t"
+  },
+  {
+    "objectID": "posts/welcome/index.html#articles",
+    "href": "posts/welcome/index.html#articles",
+    "title": "TODO",
+    "section": "",
+    "text": "Sinclair\nImmigration\nNolo contendere"
+  },
+  {
+    "objectID": "posts/basic-statutory-expert-system/index.html",
+    "href": "posts/basic-statutory-expert-system/index.html",
+    "title": "A basic statutory expert system",
+    "section": "",
+    "text": "Summary\nDespite advances in generative AI, expert legal systems will continue to be necessary for legal tech and its applications. I plan to address the rationale behind this assumption in a later post. But for now, I will lay out a simple and intuitively-coded expert system that addresses a specific and basic legal problem.\n\n\n\n\nflowchart TD\n  A[Hard edge] --&gt; B(Round edge)\n  B --&gt; C{Decision}\n  C --&gt; D[Result one]\n  C --&gt; E[Result two]\n\n\n\n\n\n\n\nAI disclaimer\nI’ve used the following AI tools to help create this project:\n\nSpelling and grammar. Grammarly\nText summarization. ChatGPT-3.5 & 4\nCode. ChatGPT-3.5 & 4, GitHub Copilot (GPT-3.5 based)\nLegal research. CanLII\nImages. DALL-E"
+  }
+]

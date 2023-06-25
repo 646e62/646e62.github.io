@@ -1,0 +1,29 @@
+---
+title: "A basic statutory expert system"
+author: "Daniel Booy"
+date: "2023-06-24"
+categories: [code, analysis]
+image: "ai.png"
+---
+
+# Summary
+
+Despite advances in generative AI, expert legal systems will continue to be necessary for legal tech and its applications. I plan to address the rationale behind this assumption in a later post. But for now, I will lay out a simple and intuitively-coded expert system that addresses a specific and basic legal problem.
+
+```{mermaid}
+flowchart TD
+  A[Hard edge] --> B(Round edge)
+  B --> C{Decision}
+  C --> D[Result one]
+  C --> E[Result two]
+```
+
+# AI disclaimer
+
+I've used the following AI tools to help create this project:
+
+* **Spelling and grammar.** Grammarly
+* **Text summarization.** ChatGPT-3.5 & 4
+* **Code.** ChatGPT-3.5 & 4, GitHub Copilot (GPT-3.5 based)
+* **Legal research.** CanLII
+* **Images.** DALL-E

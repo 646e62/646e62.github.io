@@ -1,0 +1,30 @@
+project:
+  type: website
+  output-dir: docs
+
+
+website:
+  title: "informatics.legal"
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/
+      - icon: twitter
+        href: https://twitter.com
+    background: secondary
+    search: true
+    left:
+      - text: "Home"
+        file: index.qmd
+      - text: "CV"
+        file: cv.qmd
+      - about.qmd 
+        
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+
+
+
