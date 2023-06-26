@@ -266,15 +266,23 @@ def create_facts():
 
     return Facts(complainant.name, offence_date, jurisdiction, actions)
 
-facts = create_facts()
-matches = high_treason_rules(facts)
+def verify_high_treason(matches):
+    if matches:
+        print("High treason committed. Matches:")
+        for match in matches:
+            print(match)
+    else:
+        print("No offence detected.")
 
-if matches:
-    print("High treason committed. Matches:")
-    for match in matches:
-        print(match)
-else:
-    print("No offence detected.")
+def high_treason_system():
+
+    facts = create_facts()
+    matches = high_treason_rules(facts)
+    
+    verify_high_treason(matches)
+    
+    return matches
+```
 
 And that's it! We have the beginnings of a primitive expert legal system. I will continue developing this code in subsequent blog posts, though I may occasionally return here to update the code. Refer to the GitHub repo for version history, as needed.
 

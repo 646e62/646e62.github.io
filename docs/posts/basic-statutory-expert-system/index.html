@@ -442,20 +442,39 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="main.py" class="level2">
 <h2 class="anchored" data-anchor-id="main.py">main.py</h2>
 <p>The program’s main function. It creates a Facts object and checks the factual matrix against the high treason rules system.</p>
-<p>def create_facts(): print(“Please enter the facts of the case:”)</p>
-<pre><code>victim_category = input("Who is the victim? ")
-victim_category = standardize_sovereign_names(victim_category)
-victim_category = standardize_canada_names(victim_category)
-complainant = Complainant(victim_category)
-
-offence_date = input("Date of the offence (YYYY-MM-DD): ")
-jurisdiction = input("Jurisdiction: ")
-
-actions = high_treason_facts(victim_category)
-
-return Facts(complainant.name, offence_date, jurisdiction, actions)</code></pre>
-<p>facts = create_facts() matches = high_treason_rules(facts)</p>
-<p>if matches: print(“High treason committed. Matches:”) for match in matches: print(match) else: print(“No offence detected.”)</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_facts():</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Please enter the facts of the case:"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    victim_category <span class="op">=</span> <span class="bu">input</span>(<span class="st">"Who is the victim? "</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    victim_category <span class="op">=</span> standardize_sovereign_names(victim_category)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    victim_category <span class="op">=</span> standardize_canada_names(victim_category)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    complainant <span class="op">=</span> Complainant(victim_category)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    offence_date <span class="op">=</span> <span class="bu">input</span>(<span class="st">"Date of the offence (YYYY-MM-DD): "</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    jurisdiction <span class="op">=</span> <span class="bu">input</span>(<span class="st">"Jurisdiction: "</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    actions <span class="op">=</span> high_treason_facts(victim_category)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Facts(complainant.name, offence_date, jurisdiction, actions)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> verify_high_treason(matches):</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> matches:</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"High treason committed. Matches:"</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> match <span class="kw">in</span> matches:</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(match)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"No offence detected."</span>)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> high_treason_system():</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    facts <span class="op">=</span> create_facts()</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    matches <span class="op">=</span> high_treason_rules(facts)</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    verify_high_treason(matches)</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> matches</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>And that’s it! We have the beginnings of a primitive expert legal system. I will continue developing this code in subsequent blog posts, though I may occasionally return here to update the code. Refer to the GitHub repo for version history, as needed.</p>
 </section>
 </section>
