@@ -211,7 +211,7 @@ class Facts:
 
 Once the factual matrix is put together, the program calls a rules function on those facts. This function first checks to see if the ```complainant_key``` matches either of the complainant categories in HIGH_TREASON_RULES. If so, the program checks to see if any of the facts attached to that key match the offence facts in HIGH_TREASON_RULES. If so, the function appends them to a list and returns it. If not, the function returns an empty list for the main function to interpret as a null result.
 
-```
+```{python}
 def high_treason_rules(facts):
     matches = []  # create an empty list to hold matches
     for action in facts.actions:
@@ -230,7 +230,7 @@ def high_treason_rules(facts):
 
 These assumptions assume imperfect input for the victim category and try to anticipate some synonymous terms.
 
-```
+```{python}
 def standardize_sovereign_names(name):
     known_aliases = ('queen', 'king', 'queen elizabeth', 'king charles')
     if name.lower() in known_aliases:
@@ -291,8 +291,6 @@ I've used the following AI tools to help create this project:
 # Updates
 
 * 2023-06-25: Finished adding code and ensured the program was minimally operable
-
-# Endnotes
 
 
 [^bna_paper]: See <http://www.doc.ic.ac.uk/~rak/papers/British%20Nationality%20Act.pdf>

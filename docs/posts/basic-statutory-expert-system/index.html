@@ -405,35 +405,39 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="rules.py" class="level2">
 <h2 class="anchored" data-anchor-id="rules.py">rules.py</h2>
 <p>Once the factual matrix is put together, the program calls a rules function on those facts. This function first checks to see if the <code>complainant_key</code> matches either of the complainant categories in HIGH_TREASON_RULES. If so, the program checks to see if any of the facts attached to that key match the offence facts in HIGH_TREASON_RULES. If so, the function appends them to a list and returns it. If not, the function returns an empty list for the main function to interpret as a null result.</p>
-<pre><code>def high_treason_rules(facts):
-    matches = []  # create an empty list to hold matches
-    for action in facts.actions:
-        complainant_key = action[0] 
-        action_value = action[1]
-
-        if complainant_key in HIGH_TREASON_RULES:
-            tuple_list = HIGH_TREASON_RULES[complainant_key]
-            for item in tuple_list:
-                if action_value == item[1]:
-                    matches.append(item)  # append the matching item to the list
-    return matches  # return the list of matches</code></pre>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> high_treason_rules(facts):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    matches <span class="op">=</span> []  <span class="co"># create an empty list to hold matches</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> action <span class="kw">in</span> facts.actions:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        complainant_key <span class="op">=</span> action[<span class="dv">0</span>] </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        action_value <span class="op">=</span> action[<span class="dv">1</span>]</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> complainant_key <span class="kw">in</span> HIGH_TREASON_RULES:</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            tuple_list <span class="op">=</span> HIGH_TREASON_RULES[complainant_key]</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> item <span class="kw">in</span> tuple_list:</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> action_value <span class="op">==</span> item[<span class="dv">1</span>]:</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>                    matches.append(item)  <span class="co"># append the matching item to the list</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> matches  <span class="co"># return the list of matches</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="input_correction.py" class="level2">
 <h2 class="anchored" data-anchor-id="input_correction.py">input_correction.py</h2>
 <p>These assumptions assume imperfect input for the victim category and try to anticipate some synonymous terms.</p>
-<pre><code>def standardize_sovereign_names(name):
-    known_aliases = ('queen', 'king', 'queen elizabeth', 'king charles')
-    if name.lower() in known_aliases:
-        return 'sovereign'
-    else:
-        return name
-
-def standardize_canada_names(name):
-    known_aliases = ('nation of canada', 'canadian people', 'canadian military')
-    if name.lower() in known_aliases:
-        return 'canada'
-    else:
-        return name</code></pre>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> standardize_sovereign_names(name):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    known_aliases <span class="op">=</span> (<span class="st">'queen'</span>, <span class="st">'king'</span>, <span class="st">'queen elizabeth'</span>, <span class="st">'king charles'</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> name.lower() <span class="kw">in</span> known_aliases:</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">'sovereign'</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> name</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> standardize_canada_names(name):</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    known_aliases <span class="op">=</span> (<span class="st">'nation of canada'</span>, <span class="st">'canadian people'</span>, <span class="st">'canadian military'</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> name.lower() <span class="kw">in</span> known_aliases:</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">'canada'</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> name</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="main.py" class="level2">
 <h2 class="anchored" data-anchor-id="main.py">main.py</h2>
@@ -471,9 +475,6 @@ return Facts(complainant.name, offence_date, jurisdiction, actions)</code></pre>
 <ul>
 <li>2023-06-25: Finished adding code and ensured the program was minimally operable</li>
 </ul>
-</section>
-<section id="endnotes" class="level1">
-<h1>Endnotes</h1>
 
 
 </section>
