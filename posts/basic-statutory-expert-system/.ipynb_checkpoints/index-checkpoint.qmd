@@ -54,26 +54,25 @@ _Criminal Code_ s 46(1)'s wording describes the following offence elements:
 
 1. The offence took place in Canada; AND
 2. Where the complainant is the sovereign, the defendant:
-  a.  Killed the sovereign; OR
-  b. Attempted to kill the sovereign; OR
-  c. Caused the sovereign bodily harm tending to cause 
-    i. Death; OR
-    ii. Destruction; OR
-  d. Maims the sovereign; OR
-  e. Wounds the sovereign; OR
-  f. Imprisons the sovereign; OR
-  g. Restrains the sovereign; OR
-3. Where the complainant is Canada, the defendant:
-  a. Levied war against Canada; OR
-  b. Prepared to levy war against Canada; OR
-  c. Assists an enemy at war with Canada; OR
-  d. Assists an armed force engaged in hostilities with Canada.
+  1. Killed the sovereign; OR
+  2. Attempted to kill the sovereign; OR
+  3. Caused the sovereign bodily harm tending to cause death; OR
+  4. Caused the sovereign bodily harm tending to cause destruction; OR
+  5. Maims the sovereign; OR
+  6. Wounds the sovereign; OR
+  7. Imprisons the sovereign; OR
+  8. Restrains the sovereign; OR
+3. Where the complainant is in Canada, the defendant:
+  1. Levied war against Canada; OR
+  2. Prepared to levy war against Canada; OR
+  3. Assists an enemy at war with Canada; OR
+  4. Assists an armed force engaged in hostilities with Canada.
 
 Where none of these conditions obtain, the defendant did not commit high treason.
 
 ## High treason's elements as a flowchart
 
-These elements can also be represented as follows:
+These elements can also be represented in a decision tree as follows:
 
 ```{mermaid}
 flowchart TD
@@ -107,7 +106,177 @@ _Figure 1_: An ugly flowchart describing the basic expert system's flow control
 
 Viewed this way, it is apparent how this decision tree might be easily adapted into a Python script that can, at a high level with sufficient and reliable information, decide whether a defendant committed high treason.
 
-{{< embed ../../notebooks/high_treason_expert_system.ipynb >}}
+# A minimally-viable high treason expert system
+
+## rules_constants.py
+
+Criminal offences occur when specific factual scenarios take place. This set of rules gives the user a rudimentary way of telling the program what facts exist, allowing it to record these facts when pertinent and return an opinion based on its analysis. 
+
+Currently, the program accomplishes this by first determining whether the victim falls into one of two classes covered by high treason. If so, the program asks several specific questions to determine whether there are enough additional facts to constitute the offence. If so, it records and returns the result. But if the complainant is not a member of the high treason complainant class or the defendant's actions do not match the _actus reus_ of any high treason variant, the function advises as much. 
+
+I will outline this functionality below, but for now, the HIGH_TREASON_RULES constant contains all the information needed to get a minimally-viable high treason system going. It currently includes the complainant class as its key and a list of tuples as the key's value. The tuples have a string at index 0 that prompts the user for a yes/no question and a list at index 1 containing factual information for a future function to read and relay.
+
+```{python}
+HIGH_TREASON_RULES = {
+    "sovereign": [("Did the defendant kill the sovereign?",
+                   ["kill"]),
+                  ("Did the defendant attempt to kill the sovereign?",
+                   ["kill", "attempt"]),
+                  ("Did the defendant do bodily harm to the sovereign tending to cause death?",
+                   ["bodily harm," "tending to death"]),
+                  ("Did the defendant do bodily harm to the sovereign tending to cause destruction?",
+                   ["bodily harm," "tending to destruction"]),
+                  ("Did the defendant maim the sovereign?",
+                   ["maim"]),
+                  ("Did the defendant wound the sovereign?",
+                   ["wound"]),
+                  ("Did the defendant imprison the sovereign?",
+                   ["imprison"]),
+                  ("Did the defendant restrain the sovereign?",
+                   ["restrain"])],
+    "canada": [("Did the defendant levy war against Canada?",
+                ["levy war"]),
+               ("Did the defendant prepare to levy war against Canada?",
+                ["prepare", "levy war"]),
+               ("Did the defendant assist an enemy at war with Canada?",
+                ["assist warring enemy"]),
+               ("Did the defendant assist an armed force hostily engaged with Canadian Forces?",
+                ["assist hostile force"])]}
+``` 
+
+## facts.py
+
+This function generates a factual matrix that future processes will use to determine whether the case facts make out a particular offence.
+
+At first, having the get_actions() functions return True/False rather than a list seems best. After all, if any one condition obtains, the defendant committed high treason. But this overlooks that a defendant may have committed the same offence through different means. A person who levies war against Canada AND assists a separate armed force hostile engaged with Canadian Forces commits high treason twice. Similarly, a person may have caused the sovereign bodily harm that amounts to both maiming and bodily harm tending to cause death and can be legally charged and tried for both offences (albeit not convicted of both, per *Stinchcombe*.) A list allows the program to record multiple offence instances using fewer passes. Lists save time and ensure the program remains extensible.
+
+```{python}
+def get_sovereign_actions():
+    actions = []
+    for question in HIGH_TREASON_RULES["sovereign"]:
+        response = input(question[0] + " (yes/no): ")
+        if response.lower() == 'yes':
+            actions.append(("sovereign", question[1]))
+    return actions
+
+def get_canada_actions():
+    actions = []
+    for question in HIGH_TREASON_RULES["Canada"]:
+        response = input(question[0] + " (yes/no): ")
+        if response.lower() == 'yes':
+            actions.append(("Canada", question[1]))
+    return actions
+
+def high_treason_facts(victim_name):
+    actions = []
+
+    if victim_name.lower() == 'sovereign':
+        actions = get_sovereign_actions()
+    elif victim_name.lower() == 'canada':
+        actions = get_canada_actions()
+    return actions
+```
+
+## models.py
+
+Once the program gathers this information, it needs a place to store it. The Facts class takes this job on. The version below contemplates a few variables that still need to be used. Because the program currently uses this class for just one offence, it only needs to be able to store the victim category and the defendant's actions.
+
+The Facts class is a simple class capable of handling the minimum facts required for a high treason offence. It currently contains the following attributes:
+
+* victim_category (str): The name of the victim of the offence.
+* offence_date (str): The date of the offence.
+* jurisdiction (str): The jurisdiction where the offence occurred.
+* actions (list): A list of actions that the defendant took against the victim.
+* role (list): A list of roles that the defendant played in the offence.
+
+A Facts object should account for one offence and offender. A distinct Facts object should represent any potential path to a conviction. Multiple Facts objects should represent multiple offences or offenders.
+
+```{python}
+class Facts:
+    def __init__(self, 
+                 victim_category: str, 
+                 offence_date: str, 
+                 jurisdiction: str, 
+                 actions: list = None, 
+                 role: list = None
+                ):
+        self.victim_category = victim_category
+        self.offence_date = offence_date
+        self.jurisdiction = jurisdiction
+        self.actions = actions if actions is not None else []
+        self.role = role if role is not None else []
+```
+
+## rules.py
+
+Once the factual matrix is put together, the program calls a rules function on those facts. This function first checks to see if the ```complainant_key``` matches either of the complainant categories in HIGH_TREASON_RULES. If so, the program checks to see if any of the facts attached to that key match the offence facts in HIGH_TREASON_RULES. If so, the function appends them to a list and returns it. If not, the function returns an empty list for the main function to interpret as a null result.
+
+```
+def high_treason_rules(facts):
+    matches = []  # create an empty list to hold matches
+    for action in facts.actions:
+        complainant_key = action[0] 
+        action_value = action[1]
+
+        if complainant_key in HIGH_TREASON_RULES:
+            tuple_list = HIGH_TREASON_RULES[complainant_key]
+            for item in tuple_list:
+                if action_value == item[1]:
+                    matches.append(item)  # append the matching item to the list
+    return matches  # return the list of matches
+```
+
+## input_correction.py
+
+These assumptions assume imperfect input for the victim category and try to anticipate some synonymous terms.
+
+```
+def standardize_sovereign_names(name):
+    known_aliases = ('queen', 'king', 'queen elizabeth', 'king charles')
+    if name.lower() in known_aliases:
+        return 'sovereign'
+    else:
+        return name
+
+def standardize_canada_names(name):
+    known_aliases = ('nation of canada', 'canadian people', 'canadian military')
+    if name.lower() in known_aliases:
+        return 'canada'
+    else:
+        return name
+```
+
+## main.py
+
+The program's main function. It creates a Facts object and checks the factual matrix against the high treason rules system.
+
+```{python}
+def create_facts():
+    print("Please enter the facts of the case:")
+
+    victim_category = input("Who is the victim? ")
+    victim_category = standardize_sovereign_names(victim_category)
+    victim_category = standardize_canada_names(victim_category)
+    complainant = Complainant(victim_category)
+
+    offence_date = input("Date of the offence (YYYY-MM-DD): ")
+    jurisdiction = input("Jurisdiction: ")
+
+    actions = high_treason_facts(victim_category)
+
+    return Facts(complainant.name, offence_date, jurisdiction, actions)
+
+facts = create_facts()
+matches = high_treason_rules(facts)
+
+if matches:
+    print("High treason committed. Matches:")
+    for match in matches:
+        print(match)
+else:
+    print("No offence detected.")
+
+And that's it! We have the beginnings of a primitive expert legal system. I will continue developing this code in subsequent blog posts, though I may occasionally return here to update the code. Refer to the GitHub repo for version history, as needed.
 
 # AI disclaimer
 
@@ -118,6 +287,12 @@ I've used the following AI tools to help create this project:
 * **Code.** ChatGPT-3.5 & 4, GitHub Copilot (GPT-3.5 based)
 * **Legal research.** CanLII (non-generative)
 * **Images.** DALL-E
+
+# Updates
+
+* 2023-06-25: Finished adding code and ensured the program was minimally operable
+
+# Endnotes
 
 
 [^bna_paper]: See <http://www.doc.ic.ac.uk/~rak/papers/British%20Nationality%20Act.pdf>

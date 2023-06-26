@@ -2,17 +2,23 @@
 title: "About"
 image: profile.jpg
 about:
-  template: jolla
+  template: solana
   links:
     - icon: linkedin
       text: LinkedIn
       href: https://www.linkedin.com/in/daniel-booy/
     - icon: github
       text: Github
-      href: https://github.com
+      href: https://github.com/646e62
 
 ---
 
 ## Daniel Booy
 
 I'm a staff lawyer with Legal Aid Saskatchewan practicing criminal defence out of Swift Current, Sask. All work and opinions expressed on this site are mine, and not necessarily (or impliedly) my employer's. 
+
+## informatics.legal
+
+I've built this website using Quarto on top of a GitHub Pages repo. Most code is done in and available as a Jupyter notebook, though I periodically use nvim and VS Code for their Copilot integrations.
+
+Blog posts may be periodically updated. As a GitHub Pages site, all previous blog post versions will be in the public repo attached to this website. 

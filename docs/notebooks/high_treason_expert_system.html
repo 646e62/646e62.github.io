@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>informatics.legal - [notebook] Criminal Code s 46 expert system example</title>
+<title>informatics.legal - Criminal Code s 46 expert system example</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -160,7 +160,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">[notebook] <em>Criminal Code</em> s 46 expert system example</h1>
+<h1 class="title"><em>Criminal Code</em> s 46 expert system example</h1>
 </div>
 
 
@@ -175,7 +175,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<div class="cell">
+<section id="rules_constants.py" class="level2">
+<h2 class="anchored" data-anchor-id="rules_constants.py">rules_constants.py</h2>
+<p>This file contains the questions that, once answered, can generate the factual matrix needed to determine whether the defendant committed high treason. The conditional flow is clumsy, but the questions employed that way for now may be useful for GPT-3.5-style prompts at a later point.</p>
+<div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>HIGH_TREASON_RULES <span class="op">=</span> {</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sovereign"</span>: [(<span class="st">"Did the defendant kill the sovereign?"</span>,</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"kill"</span>]),</span>
@@ -202,51 +205,305 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>               (<span class="st">"Did the defendant assist an armed force hostily engaged with Canadian Forces?"</span>,</span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>                [<span class="st">"assist hostile force"</span>])]}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="program-flow" class="level1">
-<h1>Program flow</h1>
+</section>
 <section id="facts.py" class="level2">
 <h2 class="anchored" data-anchor-id="facts.py">facts.py</h2>
+<pre><code>'''
+Generates a factual matrix that can be used to determine whether the facts of
+the case make out a particular offence.
+'''</code></pre>
+<p>At first glance there may be some advantage to having the get_actions() functions return True/False, rather than a list. After all, if any one condition is met, the defendant committed high treason. But this overlooks the fact that a defendant may have committed the same offence through different means. A person who levies war against Canada AND assists a separate armed force hostily engaged with Canadian Forces commits high treason twice. Similarly, a person may have caused the sovereign bodily harm that amounts to both maiming and bodily harm tending to cause death, and can be fairly charged and tried for both offences (albeit not convicted of both, per <em>Stinchcombe</em>.) A list allows the program to record multiple offence instances using fewer passes. Lists save time and ensure the program remains extensible.</p>
+<div class="cell" data-execution_count="122">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_sovereign_actions() <span class="op">-&gt;</span> <span class="bu">list</span>:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Ask the user questions related to actions against the sovereign.</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    actions <span class="op">=</span> []</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> question <span class="kw">in</span> HIGH_TREASON_RULES[<span class="st">"sovereign"</span>]:</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> <span class="bu">input</span>(question[<span class="dv">0</span>] <span class="op">+</span> <span class="st">" (yes/no): "</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> response.lower() <span class="op">==</span> <span class="st">'yes'</span>:</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>            actions.append((<span class="st">"sovereign"</span>, question[<span class="dv">1</span>]))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> actions</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_canada_actions() <span class="op">-&gt;</span> <span class="bu">list</span>:</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">    Ask the user questions related to actions against Canada.</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    actions <span class="op">=</span> []</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> question <span class="kw">in</span> HIGH_TREASON_RULES[<span class="st">"canada"</span>]:</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> <span class="bu">input</span>(question[<span class="dv">0</span>] <span class="op">+</span> <span class="st">" (yes/no): "</span>)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> response.lower() <span class="op">==</span> <span class="st">'yes'</span>:</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>            actions.append((<span class="st">"canada"</span>, question[<span class="dv">1</span>]))</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> actions</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> high_treason_facts(victim_category) <span class="op">-&gt;</span> <span class="bu">list</span>:</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">    Asks the user questions to determine if the facts of the case make out the offence of high treason.</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    actions <span class="op">=</span> []</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> victim_category.lower() <span class="op">==</span> <span class="st">'sovereign'</span>:</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>        actions <span class="op">=</span> get_sovereign_actions()</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> victim_category.lower() <span class="op">==</span> <span class="st">'canada'</span>:</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>        actions <span class="op">=</span> get_canada_actions()</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> actions</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="models.py" class="level2">
+<h2 class="anchored" data-anchor-id="models.py">models.py</h2>
+<p>Once the program gathers this information, it needs a place to store it. The Facts class takes this job on. The version below contemplates a few variables that aren’t in use yet. Because this class is currently being used for just one offence, it only needs to be able to store the victim category and the defendant’s actions.</p>
+<div class="cell" data-execution_count="128">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Facts:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">    A basic class capable of handling the minimum facts required for a high </span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">    treason offence.</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">    Attributes:</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">        victim_category (str): The name of the victim of the offence.</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">        offence_date (str): The date of the offence.</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">        jurisdiction (str): The jurisdiction in which the offence took place.</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">        actions (list): A list of actions that the defendant took against the </span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">            victim.</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">        role (list): A list of roles that the defendant played in the offence.</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">    A Facts object should account for one offence and offender. Any potential</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">    path to a conviction should be represented by a distinct Facts object. </span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">    Multiple offences or offenders should be represented by multiple Facts </span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">    objects.</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, </span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>                 victim_category: <span class="bu">str</span>, </span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>                 offence_date: <span class="bu">str</span>, </span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>                 jurisdiction: <span class="bu">str</span>, </span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                 actions: <span class="bu">list</span> <span class="op">=</span> <span class="va">None</span>, </span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>                 role: <span class="bu">list</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>                ):</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.victim_category <span class="op">=</span> victim_category</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.offence_date <span class="op">=</span> offence_date</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.jurisdiction <span class="op">=</span> jurisdiction</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.actions <span class="op">=</span> actions <span class="cf">if</span> actions <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="cf">else</span> []</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.role <span class="op">=</span> role <span class="cf">if</span> role <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="cf">else</span> []</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="rules.py" class="level2">
+<h2 class="anchored" data-anchor-id="rules.py">rules.py</h2>
+<p>Once the factual matrix is put together, the program calls a rules function on those facts. This function first checks to see if the <code>complainant_key</code> matches either of the complainant categories in HIGH_TREASON_RULES. If so, the program checks to see if any of the facts attached to that key match the offence facts in HIGH_TREASON_RULES. If so, the function appends them to a list and returns it. If not, the function returns an empty list for the main function to interpret as a null result.</p>
+<div class="cell" data-execution_count="116">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">Rules determining whether a factual matrix corresponds to offence elements.</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> high_treason_rules(facts):</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Checks if the facts of the case make out the offence of high treason.</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    matches <span class="op">=</span> []  <span class="co"># create an empty list to hold matches</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check if any of the actions in the facts are in the list of high treason actions</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> action <span class="kw">in</span> facts.actions:</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        complainant_key <span class="op">=</span> action[<span class="dv">0</span>] </span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        action_value <span class="op">=</span> action[<span class="dv">1</span>]</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> complainant_key <span class="kw">in</span> HIGH_TREASON_RULES: <span class="co"># Checks to see if the complainant category lines up with one of the two in HIGH_TREASON RULES</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>            tuple_list <span class="op">=</span> HIGH_TREASON_RULES[complainant_key]</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> item <span class="kw">in</span> tuple_list:</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> action_value <span class="op">==</span> item[<span class="dv">1</span>]:</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>                    matches.append(item)  <span class="co"># append the matching item to the list</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> matches  <span class="co"># return the list of matches</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="dev_models.py" class="level2">
+<h2 class="anchored" data-anchor-id="dev_models.py">dev_models.py</h2>
+<p>These models weren’t used to develop the first few versions of the high treason system, but models like this will be needed to extend the system to other offences. It may be needed to extend the high treason system to account for elements like jurisdiction, punishment, procedure, etc.</p>
+<div class="cell" data-execution_count="108">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Complainant:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Creates a complainant instance. </span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name<span class="op">=</span><span class="va">None</span>, age<span class="op">=</span><span class="va">None</span>, category<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.name <span class="op">=</span> name</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.age <span class="op">=</span> age</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.category <span class="op">=</span> category</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Defendant:</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">    Creates a defendant instance. Necessary to the extent that some offences </span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">    only apply to defendants with certain characteristics, and to the extent</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">    that some offences will involve multiple defendants who need to be kept</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">    distinct from one another.</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name<span class="op">=</span><span class="va">None</span>, age<span class="op">=</span><span class="va">None</span>, liability<span class="op">=</span><span class="va">None</span>, criminal_record<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.name <span class="op">=</span> name</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.age <span class="op">=</span> age</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.liability <span class="op">=</span> liability</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.criminal_record <span class="op">=</span> criminal_record</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="input_correction.py" class="level2">
+<h2 class="anchored" data-anchor-id="input_correction.py">input_correction.py</h2>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">"""</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">Functions used to process input strings and correct them to a standard format.</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">"""</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># High treason</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> standardize_sovereign_names(name):</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">    This function takes a name and standardizes it to 'Sovereign' if it matches any of the known aliases.</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    known_aliases <span class="op">=</span> (<span class="st">'queen'</span>, <span class="st">'king'</span>, <span class="st">'queen elizabeth'</span>, <span class="st">'king charles'</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> name.lower() <span class="kw">in</span> known_aliases:</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">'sovereign'</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> name</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> standardize_canada_names(name):</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co">    This function takes a name and standardizes it to 'Canada' if it matches any of the known aliases.</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    known_aliases <span class="op">=</span> (<span class="st">'nation of canada'</span>, <span class="st">'canadian people'</span>, <span class="st">'canadian military'</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> name.lower() <span class="kw">in</span> known_aliases:</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">'canada'</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> name</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Treason</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> treason_location_type(input_string: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="co">    This function helps determine whether a string entity is a province or a </span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="co">    federally-regulated territory for the purpose of determining whether a </span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="co">    defendant has committed treason.</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    input_string <span class="op">=</span> input_string.replace(<span class="st">'.'</span>, <span class="st">''</span>)  <span class="co"># Remove periods from input</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Dictionary mapping province names, abbreviations and territory names, abbreviations to their corresponding types</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    locations <span class="op">=</span> {</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>        <span class="st">"alberta"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>        <span class="st">"ab"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>        <span class="st">"alta"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>        <span class="st">"british columbia"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>        <span class="st">"bc"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>        <span class="st">"manitoba"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>        <span class="st">"mb"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>        <span class="st">"man"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>        <span class="st">"new brunswick"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>        <span class="st">"nb"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>        <span class="st">"newfoundland and labrador"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>        <span class="st">"nl"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>        <span class="st">"nova scotia"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>        <span class="st">"ns"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>        <span class="st">"ontario"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>        <span class="st">"on"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>        <span class="st">"ont"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>        <span class="st">"prince edward island"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>        <span class="st">"pei"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>        <span class="st">"quebec"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>        <span class="st">"qc"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>        <span class="st">"que"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>        <span class="st">"saskatchewan"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sk"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sask"</span>: <span class="st">"province"</span>,</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>        <span class="st">"northwest territories"</span>: <span class="st">"canada"</span>,</span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>        <span class="st">"nt"</span>: <span class="st">"canada"</span>,</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>        <span class="st">"nwt"</span>: <span class="st">"canada"</span>,</span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>        <span class="st">"nunavut"</span>: <span class="st">"canada"</span>,</span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>        <span class="st">"nu"</span>: <span class="st">"canada"</span>,</span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>        <span class="st">"nvt"</span>: <span class="st">"canada"</span>,</span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>        <span class="st">"yukon"</span>: <span class="st">"canada"</span>,</span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>        <span class="st">"yt"</span>: <span class="st">"canada"</span></span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return the corresponding value if the input string is in the dictionary, else return "Unknown"</span></span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> locations.get(input_string.lower(), <span class="st">"Unknown"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="main.py" class="level2">
 <h2 class="anchored" data-anchor-id="main.py">main.py</h2>
 <p>This function executes the program. It creates a Facts object by canvassing the minimum number of questions for the offence’s factual matrix. Once created, Facts is passed to the rules set which returns the final result.</p>
 <p>The function is limited to high treason as defined in <em>Criminal Code</em> s 46, and thus has this rule set coded into tthe function. Future versions should modularize this rule set call.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> facts <span class="im">import</span> high_treason_facts</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rules <span class="im">import</span> high_treason_rules</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> models <span class="im">import</span> Facts, Complainant</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> input_correction <span class="im">import</span> standardize_sovereign_names, standardize_canada_names</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_facts():</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">    Creates a Facts object that can then be read using the rule base.</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Please enter the facts of the case:"</span>)</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    victim_name <span class="op">=</span> <span class="bu">input</span>(<span class="st">"Who is the victim? "</span>)</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    victim_name <span class="op">=</span> standardize_sovereign_names(victim_name)</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    victim_name <span class="op">=</span> standardize_canada_names(victim_name)</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    complainant <span class="op">=</span> Complainant(victim_name)</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    offence_date <span class="op">=</span> <span class="bu">input</span>(<span class="st">"Date of the offence (YYYY-MM-DD): "</span>)</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    jurisdiction <span class="op">=</span> <span class="bu">input</span>(<span class="st">"Jurisdiction: "</span>)</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    actions <span class="op">=</span> high_treason_facts(victim_name)</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Facts(complainant.name, offence_date, jurisdiction, actions)</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>facts <span class="op">=</span> create_facts()</span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> high_treason_rules(facts):</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"High treason committed."</span>)</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"No offence detected."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="137">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_facts():</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Creates a Facts object that can then be read using the rule base.</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Please enter the facts of the case:"</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    victim_category <span class="op">=</span> <span class="bu">input</span>(<span class="st">"Who is the victim? "</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    victim_category <span class="op">=</span> standardize_sovereign_names(victim_category)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    victim_category <span class="op">=</span> standardize_canada_names(victim_category)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    complainant <span class="op">=</span> Complainant(victim_category)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    offence_date <span class="op">=</span> <span class="bu">input</span>(<span class="st">"Date of the offence (YYYY-MM-DD): "</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    jurisdiction <span class="op">=</span> <span class="bu">input</span>(<span class="st">"Jurisdiction: "</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    actions <span class="op">=</span> high_treason_facts(victim_category)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Facts(complainant.name, offence_date, jurisdiction, actions)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> verify_high_treason(matches):</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> matches:</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"High treason committed. Matches:"</span>)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> match <span class="kw">in</span> matches:</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(match)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"No offence detected."</span>)</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> high_treason_system():</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    facts <span class="op">=</span> create_facts()</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    matches <span class="op">=</span> high_treason_rules(facts)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    verify_high_treason(matches)</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> matches</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="141">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>matches <span class="op">=</span> high_treason_system()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Please enter the facts of the case:
+High treason committed. Matches:
+('Did the defendant kill the sovereign?', ['kill'])
+('Did the defendant do bodily harm to the sovereign tending to cause death?', ['bodily harm', 'tending to death'])</code></pre>
+</div>
+<div class="cell-output cell-output-stdin">
+<pre><code>Who is the victim?  queen
+Date of the offence (YYYY-MM-DD):  1992
+Jurisdiction:  canada
+Did the defendant kill the sovereign? (yes/no):  yes
+Did the defendant attempt to kill the sovereign? (yes/no):  no
+Did the defendant do bodily harm to the sovereign tending to cause death? (yes/no):  yes
+Did the defendant do bodily harm to the sovereign tending to cause destruction? (yes/no):  no
+Did the defendant maim the sovereign? (yes/no):  no
+Did the defendant wound the sovereign? (yes/no):  no
+Did the defendant imprison the sovereign? (yes/no):  no
+Did the defendant restrain the sovereign? (yes/no):  no</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="142">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> matches:</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"High treason committed. Matches:"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> match <span class="kw">in</span> matches:</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(match)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"No offence detected."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>High treason committed. Matches:
+('Did the defendant kill the sovereign?', ['kill'])
+('Did the defendant do bodily harm to the sovereign tending to cause death?', ['bodily harm', 'tending to death'])</code></pre>
+</div>
 </div>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

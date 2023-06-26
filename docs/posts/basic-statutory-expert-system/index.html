@@ -22,6 +22,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -69,7 +103,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -125,7 +159,7 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">[notebook] <em>Criminal Code</em> s 46 expert system example</h1>
+      <h1 class="title">A basic statutory expert system</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">article</div>
                 <div class="quarto-category">code</div>
@@ -164,9 +198,7 @@ ul.task-list li input[type="checkbox"] {
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
-    <div class="quarto-alternate-notebooks"><h2>Notebooks</h2><ul><li><a href="../../notebooks/high_treason_expert_system.ipynb.html"><i class="bi bi-journal-code"></i>high_treason_expert_system.ipynb</a></li></ul></div></div>
+    
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
 
@@ -218,20 +250,15 @@ ul.task-list li input[type="checkbox"] {
 <ol type="1">
 <li>The offence took place in Canada; AND</li>
 <li>Where the complainant is the sovereign, the defendant:</li>
-</ol>
-<ol type="a">
 <li>Killed the sovereign; OR</li>
 <li>Attempted to kill the sovereign; OR</li>
-<li>Caused the sovereign bodily harm tending to cause i. Death; OR ii. Destruction; OR</li>
+<li>Caused the sovereign bodily harm tending to cause death; OR</li>
+<li>Caused the sovereign bodily harm tending to cause destruction; OR</li>
 <li>Maims the sovereign; OR</li>
 <li>Wounds the sovereign; OR</li>
 <li>Imprisons the sovereign; OR</li>
 <li>Restrains the sovereign; OR</li>
-</ol>
-<ol start="3" type="1">
-<li>Where the complainant is Canada, the defendant:</li>
-</ol>
-<ol type="a">
+<li>Where the complainant is in Canada, the defendant:</li>
 <li>Levied war against Canada; OR</li>
 <li>Prepared to levy war against Canada; OR</li>
 <li>Assists an enemy at war with Canada; OR</li>
@@ -241,7 +268,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="high-treasons-elements-as-a-flowchart" class="level2">
 <h2 class="anchored" data-anchor-id="high-treasons-elements-as-a-flowchart">High treason’s elements as a flowchart</h2>
-<p>These elements can also be represented as follows:</p>
+<p>These elements can also be represented in a decision tree as follows:</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -281,17 +308,153 @@ ul.task-list li input[type="checkbox"] {
 <p>Viewed this way, it is apparent how this decision tree might be easily adapted into a Python script that can, at a high level with sufficient and reliable information, decide whether a defendant committed high treason.</p>
 </section>
 </section>
-<section id="program-flow" class="level1 quarto-embed-nb-cell">
-<h1>Program flow</h1>
+<section id="a-minimally-viable-high-treason-expert-system" class="level1">
+<h1>A minimally-viable high treason expert system</h1>
+<section id="rules_constants.py" class="level2">
+<h2 class="anchored" data-anchor-id="rules_constants.py">rules_constants.py</h2>
+<p>Criminal offences occur when specific factual scenarios take place. This set of rules gives the user a rudimentary way of telling the program what facts exist, allowing it to record these facts when pertinent and return an opinion based on its analysis.</p>
+<p>Currently, the program accomplishes this by first determining whether the victim falls into one of two classes covered by high treason. If so, the program asks several specific questions to determine whether there are enough additional facts to constitute the offence. If so, it records and returns the result. But if the complainant is not a member of the high treason complainant class or the defendant’s actions do not match the <em>actus reus</em> of any high treason variant, the function advises as much.</p>
+<p>I will outline this functionality below, but for now, the HIGH_TREASON_RULES constant contains all the information needed to get a minimally-viable high treason system going. It currently includes the complainant class as its key and a list of tuples as the key’s value. The tuples have a string at index 0 that prompts the user for a yes/no question and a list at index 1 containing factual information for a future function to read and relay.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>HIGH_TREASON_RULES <span class="op">=</span> {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sovereign"</span>: [(<span class="st">"Did the defendant kill the sovereign?"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"kill"</span>]),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant attempt to kill the sovereign?"</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"kill"</span>, <span class="st">"attempt"</span>]),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant do bodily harm to the sovereign tending to cause death?"</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"bodily harm,"</span> <span class="st">"tending to death"</span>]),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant do bodily harm to the sovereign tending to cause destruction?"</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"bodily harm,"</span> <span class="st">"tending to destruction"</span>]),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant maim the sovereign?"</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"maim"</span>]),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant wound the sovereign?"</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"wound"</span>]),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant imprison the sovereign?"</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"imprison"</span>]),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant restrain the sovereign?"</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"restrain"</span>])],</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"canada"</span>: [(<span class="st">"Did the defendant levy war against Canada?"</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>                [<span class="st">"levy war"</span>]),</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>               (<span class="st">"Did the defendant prepare to levy war against Canada?"</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>                [<span class="st">"prepare"</span>, <span class="st">"levy war"</span>]),</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>               (<span class="st">"Did the defendant assist an enemy at war with Canada?"</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>                [<span class="st">"assist warring enemy"</span>]),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>               (<span class="st">"Did the defendant assist an armed force hostily engaged with Canadian Forces?"</span>,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>                [<span class="st">"assist hostile force"</span>])]}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 <section id="facts.py" class="level2">
 <h2 class="anchored" data-anchor-id="facts.py">facts.py</h2>
+<p>This function generates a factual matrix that future processes will use to determine whether the case facts make out a particular offence.</p>
+<p>At first, having the get_actions() functions return True/False rather than a list seems best. After all, if any one condition obtains, the defendant committed high treason. But this overlooks that a defendant may have committed the same offence through different means. A person who levies war against Canada AND assists a separate armed force hostile engaged with Canadian Forces commits high treason twice. Similarly, a person may have caused the sovereign bodily harm that amounts to both maiming and bodily harm tending to cause death and can be legally charged and tried for both offences (albeit not convicted of both, per <em>Stinchcombe</em>.) A list allows the program to record multiple offence instances using fewer passes. Lists save time and ensure the program remains extensible.</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_sovereign_actions():</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    actions <span class="op">=</span> []</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> question <span class="kw">in</span> HIGH_TREASON_RULES[<span class="st">"sovereign"</span>]:</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> <span class="bu">input</span>(question[<span class="dv">0</span>] <span class="op">+</span> <span class="st">" (yes/no): "</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> response.lower() <span class="op">==</span> <span class="st">'yes'</span>:</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>            actions.append((<span class="st">"sovereign"</span>, question[<span class="dv">1</span>]))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> actions</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_canada_actions():</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    actions <span class="op">=</span> []</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> question <span class="kw">in</span> HIGH_TREASON_RULES[<span class="st">"Canada"</span>]:</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> <span class="bu">input</span>(question[<span class="dv">0</span>] <span class="op">+</span> <span class="st">" (yes/no): "</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> response.lower() <span class="op">==</span> <span class="st">'yes'</span>:</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>            actions.append((<span class="st">"Canada"</span>, question[<span class="dv">1</span>]))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> actions</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> high_treason_facts(victim_name):</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    actions <span class="op">=</span> []</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> victim_name.lower() <span class="op">==</span> <span class="st">'sovereign'</span>:</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        actions <span class="op">=</span> get_sovereign_actions()</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> victim_name.lower() <span class="op">==</span> <span class="st">'canada'</span>:</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        actions <span class="op">=</span> get_canada_actions()</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> actions</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="models.py" class="level2">
+<h2 class="anchored" data-anchor-id="models.py">models.py</h2>
+<p>Once the program gathers this information, it needs a place to store it. The Facts class takes this job on. The version below contemplates a few variables that still need to be used. Because the program currently uses this class for just one offence, it only needs to be able to store the victim category and the defendant’s actions.</p>
+<p>The Facts class is a simple class capable of handling the minimum facts required for a high treason offence. It currently contains the following attributes:</p>
+<ul>
+<li>victim_category (str): The name of the victim of the offence.</li>
+<li>offence_date (str): The date of the offence.</li>
+<li>jurisdiction (str): The jurisdiction where the offence occurred.</li>
+<li>actions (list): A list of actions that the defendant took against the victim.</li>
+<li>role (list): A list of roles that the defendant played in the offence.</li>
+</ul>
+<p>A Facts object should account for one offence and offender. A distinct Facts object should represent any potential path to a conviction. Multiple Facts objects should represent multiple offences or offenders.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Facts:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                 victim_category: <span class="bu">str</span>, </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                 offence_date: <span class="bu">str</span>, </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                 jurisdiction: <span class="bu">str</span>, </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                 actions: <span class="bu">list</span> <span class="op">=</span> <span class="va">None</span>, </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                 role: <span class="bu">list</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                ):</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.victim_category <span class="op">=</span> victim_category</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.offence_date <span class="op">=</span> offence_date</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.jurisdiction <span class="op">=</span> jurisdiction</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.actions <span class="op">=</span> actions <span class="cf">if</span> actions <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="cf">else</span> []</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.role <span class="op">=</span> role <span class="cf">if</span> role <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="cf">else</span> []</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="rules.py" class="level2">
+<h2 class="anchored" data-anchor-id="rules.py">rules.py</h2>
+<p>Once the factual matrix is put together, the program calls a rules function on those facts. This function first checks to see if the <code>complainant_key</code> matches either of the complainant categories in HIGH_TREASON_RULES. If so, the program checks to see if any of the facts attached to that key match the offence facts in HIGH_TREASON_RULES. If so, the function appends them to a list and returns it. If not, the function returns an empty list for the main function to interpret as a null result.</p>
+<pre><code>def high_treason_rules(facts):
+    matches = []  # create an empty list to hold matches
+    for action in facts.actions:
+        complainant_key = action[0] 
+        action_value = action[1]
+
+        if complainant_key in HIGH_TREASON_RULES:
+            tuple_list = HIGH_TREASON_RULES[complainant_key]
+            for item in tuple_list:
+                if action_value == item[1]:
+                    matches.append(item)  # append the matching item to the list
+    return matches  # return the list of matches</code></pre>
+</section>
+<section id="input_correction.py" class="level2">
+<h2 class="anchored" data-anchor-id="input_correction.py">input_correction.py</h2>
+<p>These assumptions assume imperfect input for the victim category and try to anticipate some synonymous terms.</p>
+<pre><code>def standardize_sovereign_names(name):
+    known_aliases = ('queen', 'king', 'queen elizabeth', 'king charles')
+    if name.lower() in known_aliases:
+        return 'sovereign'
+    else:
+        return name
+
+def standardize_canada_names(name):
+    known_aliases = ('nation of canada', 'canadian people', 'canadian military')
+    if name.lower() in known_aliases:
+        return 'canada'
+    else:
+        return name</code></pre>
 </section>
 <section id="main.py" class="level2">
 <h2 class="anchored" data-anchor-id="main.py">main.py</h2>
-<p>This function executes the program. It creates a Facts object by canvassing the minimum number of questions for the offence’s factual matrix. Once created, Facts is passed to the rules set which returns the final result.</p>
-<p>The function is limited to high treason as defined in <em>Criminal Code</em> s 46, and thus has this rule set coded into tthe function. Future versions should modularize this rule set call.</p>
+<p>The program’s main function. It creates a Facts object and checks the factual matrix against the high treason rules system.</p>
+<p>def create_facts(): print(“Please enter the facts of the case:”)</p>
+<pre><code>victim_category = input("Who is the victim? ")
+victim_category = standardize_sovereign_names(victim_category)
+victim_category = standardize_canada_names(victim_category)
+complainant = Complainant(victim_category)
+
+offence_date = input("Date of the offence (YYYY-MM-DD): ")
+jurisdiction = input("Jurisdiction: ")
+
+actions = high_treason_facts(victim_category)
+
+return Facts(complainant.name, offence_date, jurisdiction, actions)</code></pre>
+<p>facts = create_facts() matches = high_treason_rules(facts)</p>
+<p>if matches: print(“High treason committed. Matches:”) for match in matches: print(match) else: print(“No offence detected.”)</p>
+<p>And that’s it! We have the beginnings of a primitive expert legal system. I will continue developing this code in subsequent blog posts, though I may occasionally return here to update the code. Refer to the GitHub repo for version history, as needed.</p>
 </section>
-<a class="quarto-notebook-link" id="nblink-1" href="../../notebooks/high_treason_expert_system.ipynb.html">Source: high_treason_expert_system.ipynb</a></section>
+</section>
 <section id="ai-disclaimer" class="level1">
 <h1>AI disclaimer</h1>
 <p>I’ve used the following AI tools to help create this project:</p>
@@ -302,6 +465,15 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Legal research.</strong> CanLII (non-generative)</li>
 <li><strong>Images.</strong> DALL-E</li>
 </ul>
+</section>
+<section id="updates" class="level1">
+<h1>Updates</h1>
+<ul>
+<li>2023-06-25: Finished adding code and ensured the program was minimally operable</li>
+</ul>
+</section>
+<section id="endnotes" class="level1">
+<h1>Endnotes</h1>
 
 
 </section>
