@@ -1,0 +1,33 @@
+---
+title: "TODO"
+author: "Daniel Booy"
+date: "2023-06-21"
+image: "cyberspace.png"
+categories: [news]
+date-modified: "2023-06-25"
+---
+
+# TODO
+
+Items that need attention sooner than later.
+
+## Articles
+
+* Sinclair
+* Immigration
+* _Nolo contendere_
+
+## BSES
+
+* High treason
+    * Jurisdiction
+        * "In Canada" requirement
+    * Punishment
+    * Procedure
+* Treason
+    * Offence elements
+* Historic
+    * Treason case history
+        * Statutory (if applicable)
+        * Common law
+    * High treason case history (if applicable)

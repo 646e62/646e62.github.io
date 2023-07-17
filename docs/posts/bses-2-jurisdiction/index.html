@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.427">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Daniel Booy">
+<meta name="dcterms.date" content="2023-07-16">
+
+<title>informatics.legal - BSES part 2: adding jurisdictional functionality</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">informatics.legal</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html" rel="" target="">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../cv.html" rel="" target="">
+ <span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">BSES part 2: adding jurisdictional functionality</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">code</div>
+                <div class="quarto-category">bses</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Daniel Booy </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 16, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  <div>
+    <div class="abstract">
+      <div class="abstract-title">Abstract</div>
+      The BSES from the previous post covered most of high treason’s basics, but left out one question with some particular intra-statutory considerations — namely, jurisdiction. This next section adds this step and begins the process of incorporating other aspects of the <em>Criminal Code</em> into the program.
+    </div>
+  </div>
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="basic-statutory-expert-system-2-jurisdiction" class="level1">
+<h1>Basic statutory expert system 2 — jurisdiction</h1>
+<p>For a defendant to be guilty of a Canadian criminal offence, the offence must have been committed “in Canada.” In most cases, determining whether a crime was committed in Canada is straightforward. But in rare instances, Canada will have jurisdiction over a crime committed outside Canada. In these cases, Canadian jurisdiction must either be constructed or waived. The next set of functions goes through the necessary steps to determine whether an offence was committed “in Canada,” with an extensive focus on constructive jurisdiction.</p>
+<section id="canadian-jurisdictions" class="level2">
+<h2 class="anchored" data-anchor-id="canadian-jurisdictions">Canadian jurisdictions</h2>
+<p>Before delving into constructive jurisdiction, I outline a general system for dealing with jurisdiction. The first (and most straightforward) way to understand an offender committing an offence “in Canada” is for that offence to have geographically occurred in Canada. In virtually every case, the crime will allegedly have happened in Canada geographically, so it is crucial to implement this functionality early on. Doing so requires another set of constants and some code to use the <code>Facts.jurisdiction</code> attribute.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>CANADIAN_PROVINCES: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">str</span>]] <span class="op">=</span> {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Alberta'</span>: (<span class="st">'AB'</span>, <span class="st">'Alta'</span>),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'British Columbia'</span>: (<span class="st">'BC'</span>, <span class="st">'B.C.'</span>),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Manitoba'</span>: (<span class="st">'MB'</span>, <span class="st">'Man.'</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'New Brunswick'</span>: (<span class="st">'NB'</span>, <span class="st">'N.B.'</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Newfoundland and Labrador'</span>: (<span class="st">'NL'</span>, <span class="st">'N.L.'</span>),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Nova Scotia'</span>: (<span class="st">'NS'</span>, <span class="st">'N.S.'</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Ontario'</span>: (<span class="st">'ON'</span>, <span class="st">'Ont.'</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Prince Edward Island'</span>: (<span class="st">'PE'</span>, <span class="st">'P.E.I.'</span>),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Quebec'</span>: (<span class="st">'QC'</span>, <span class="st">'Que.'</span>),</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Saskatchewan'</span>: (<span class="st">'SK'</span>, <span class="st">'Sask.'</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>CANADIAN_TERRITORIES: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">str</span>]] <span class="op">=</span> {</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Northwest Territories'</span>: (<span class="st">'NT'</span>, <span class="st">'N.W.T.'</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Nunavut'</span>: (<span class="st">'NU'</span>, <span class="st">'Nvt.'</span>),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Yukon'</span>: (<span class="st">'YT'</span>, <span class="st">'Y.T.'</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="jurisdiction-verification" class="level2">
+<h2 class="anchored" data-anchor-id="jurisdiction-verification">Jurisdiction verification</h2>
+<p>With that preliminary jurisdictional matrix implemented, the next step is determining whether the jurisdiction entered matches one of the geographical Canadian jurisdictions. Legal jurisdiction is not something inherent to the offence itself or the defendant. Rather, jurisdiction is primarily determined based on the location of the crime. It therefore makes sense to situate jurisdictional functions within the <code>Facts</code> class.[^1]</p>
+<section id="handling-geographic-jurisdiction-via-verify_canadian_jurisdiction" class="level3">
+<h3 class="anchored" data-anchor-id="handling-geographic-jurisdiction-via-verify_canadian_jurisdiction">Handling geographic jurisdiction via <code>verify_canadian_jurisdiction()</code></h3>
+<p>The verify_canadian_jurisdiction() function checks whether the given jurisdiction string matches any Canadian provincial, territorial, or federal jurisdiction. If so, the function determines that the offence occurred “in Canada,” thus making out general jurisdiction.</p>
+</section>
+<section id="user-generated-facts-via-create_facts" class="level3">
+<h3 class="anchored" data-anchor-id="user-generated-facts-via-create_facts">User-generated facts via <code>create_facts()</code></h3>
+<p>Previously, the <code>create_facts</code> function was part of the main.py program execution file. While this was sufficient for a minimally-viable product, more workable solutions exist. For example, there will be times when we want the program to run without having to go through a lengthy checklist of questions, especially when the user may enter that information directly into a <code>Facts</code> class object.</p>
+<p>For now, the <code>create_facts</code> method can continue to have <code>high_treason_facts</code> assigned to it through hard coding. I will eventually start siphoning off processes related to high treason and other offences into separate functions and possibly a separate <code>Offence</code> class.</p>
+</section>
+</section>
+<section id="constructive-jurisdiction" class="level2">
+<h2 class="anchored" data-anchor-id="constructive-jurisdiction">Constructive jurisdiction</h2>
+<p>The code thus far covers geographical jurisdiction. But the jurisdictional question still needs to be fully resolved. In rare circumstances, the <em>Criminal Code</em> allows the court to construe Canadian jurisdiction constructively, even if an offence didn’t occur “in Canada.” Furthermore, for certain classes of people, the jurisdictional requirement for high treason is waived, while for other categories of people, Canadian jurisdiction may exist regardless of where a defendant commits an offence. These edge cases include:</p>
+<ul>
+<li><strong>Public Service employees.</strong> Public Service employees are deemed to have committed an offence in Canada regardless of where they committed it.</li>
+<li><strong>Canadian citizens and allegiance-owers.</strong> For treason and high treason specifically, a Canadian citizen, or anyone who owes allegiance to the sovereign, will have committed treason or high treason regardless of whether the jurisdictional component obtains. Unlike Public Service employees, who have jurisdiction <em>constructed</em> regardless of where they commit crimes, this exception obviates the jurisdictional requirement.</li>
+<li><strong>Aircraft, spacecraft, the space station and the lunar surface.</strong> Crimes committed in specific unorthodox locations will be deemed committed in Canada if certain conditions obtain. The requirements and exceptions are several, as will be seen below.</li>
+</ul>
+<section id="public-service-employees" class="level3">
+<h3 class="anchored" data-anchor-id="public-service-employees">Public Service employees</h3>
+<p>Public Service employees are a unique class in the <em>Criminal Code</em>, in that they alone are deemed to have committed an offence “in Canada” regardless of where they commit a crime. They appear to be the only class singled out in this way in the <em>Criminal Code</em>. The statutory authority for this also extends to another act — the <em>Public Service Employment Act</em>, SC 2003, c 22, ss 12, 13.</p>
+<section id="cc-s-74-offences-by-public-service-employees" class="level4">
+<h4 class="anchored" data-anchor-id="cc-s-74-offences-by-public-service-employees">CC s 7(4) — Offences by Public Service employees</h4>
+<blockquote class="blockquote">
+<p>Every one who, while employed as an employee within the meaning of the Public Service Employment Act in a place outside Canada, commits an act or omission in that place that is an offence under the laws of that place and that, if committed in Canada, would be an offence punishable by indictment shall be deemed to have committed that act or omission in Canada.</p>
+</blockquote>
+</section>
+<section id="psea-21-definition-employee" class="level4">
+<h4 class="anchored" data-anchor-id="psea-21-definition-employee">PSEA 2(1) — definition: employee</h4>
+<blockquote class="blockquote">
+<p><strong>employee</strong> means a person employed in that part of the public service to which the Commission has exclusive authority to make appointments. (<em>fonctionnaire</em>)</p>
+</blockquote>
+</section>
+<section id="psea-291---commissions-exclusive-authority" class="level4">
+<h4 class="anchored" data-anchor-id="psea-291---commissions-exclusive-authority">PSEA 29(1) - Commission’s exclusive authority</h4>
+<blockquote class="blockquote">
+<p>Except as provided in this Act, the Commission has the exclusive authority to make appointments, to or from within the public service, of persons for whose appointment there is no authority in or under any other Act of Parliament.</p>
+</blockquote>
+<p>Determining who exactly qualifies as a Public Service employee, then, requires that:</p>
+<ul>
+<li>They are a public service employee;</li>
+<li>The Public Service Commission may appoint that employee; and</li>
+<li>No other [federal] statutory authority exists to appoint that employee.</li>
+</ul>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>PUBLIC_EMPLOYEE_CRITERIA <span class="op">=</span> (<span class="st">"Is the defendant a public service employee?"</span>,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"Does the Public Service Commission have the authority to appoint the defendant?"</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"Does any other federal statute confer authority to appoint the defendant?"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>OTHER_ACTS_OF_PARLIAMENT <span class="op">=</span> {</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="querying-the-user-about-public-employment-via-public_employee_test" class="level3">
+<h3 class="anchored" data-anchor-id="querying-the-user-about-public-employment-via-public_employee_test">Querying the user about public employment via <code>public_employee_test()</code></h3>
+<p>Iff all three indices are <code>True</code>, the individual is a Public Service employee within the meaning of the PSEA and the <em>Criminal Code</em>. But answering this question correctly requires additional knowledge about the Public Service Commission’s exclusive authority, which in turn requires additional knowledge about the scope of all other Acts of Parliament that cordon off appointment authority, if any. While I don’t know whether there are any such statutes, I’ve built the function to incorporate them if they exist. If they don’t, adding this functionality can help future-proof the function if Parliament passes any such acts in the future.</p>
+<p>We can incorporate these questions into a simple UI method for the <code>Defendant</code> class that determines whether a person is a public employee, as the <em>Criminal Code</em> understands the term. The function returns <code>True</code> iff all conditions presented are <code>True</code>.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> public_employee_test(<span class="va">self</span>):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">        Verifies whether a defendant is a public employee as understood by the </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">        Criminal Code.</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> question <span class="kw">in</span> PUBLIC_EMPLOYEE_CRITERIA:</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            response <span class="op">=</span> <span class="bu">input</span>(question <span class="op">+</span> <span class="st">" (yes/no): "</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> response.strip().lower() <span class="op">!=</span> <span class="st">'yes'</span>:</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.vocation.append(<span class="st">"public employee"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="canadian-citizens-and-allegiance-owers" class="level3">
+<h3 class="anchored" data-anchor-id="canadian-citizens-and-allegiance-owers">Canadian citizens and allegiance-owers</h3>
+<section id="cc-463-canadian-citizen" class="level4">
+<h4 class="anchored" data-anchor-id="cc-463-canadian-citizen">CC 46(3) — Canadian citizen</h4>
+<blockquote class="blockquote">
+<pre><code>Notwithstanding subsection (1) or (2), a Canadian citizen or a person who owes allegiance to Her Majesty in right of Canada,
+
+    (a) commits high treason if, while in or out of Canada, he does anything mentioned in subsection (1); or
+
+    (b) commits treason if, while in or out of Canada, he does anything mentioned in subsection (2).</code></pre>
+</blockquote>
+<p>Because the statute doesn’t define allegiance, I must make some assumptions. Primarily, I assume that a person owes allegiance to the sovereign iff they are a Commonwealth country citizen. If this theory holds, we can use a dictionary to check whether a defendant owes allegiance to the sovereign. This dictionary lists demonyms as values and tuples containing country names as keys. Because Canada is also a Commonwealth country, distinguishing the two programmatically is optional.</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>COMMONWEALTH_DEMONYMS <span class="op">=</span> {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"antigua and barbuda"</span>: [<span class="st">"antiguan"</span>, </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"barbudan"</span>],</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"australia"</span>: [<span class="st">"australian"</span>],</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"the bahamas"</span>: [<span class="st">"bahamian"</span>],</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bangladesh"</span>: [<span class="st">"bangladeshi"</span>],</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"barbados"</span>: [<span class="st">"barbadian"</span>, </span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"bajan"</span>],</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"belize"</span>: [<span class="st">"belizean"</span>],</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"botswana"</span>: [<span class="st">"botswanan"</span>],</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"brunei darussalam"</span>: [<span class="st">"bruneian"</span>],</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cameroon"</span>: [<span class="st">"cameroonian"</span>],</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"canada"</span>: [<span class="st">"canadian"</span>],</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cyprus"</span>: [<span class="st">"cypriot"</span>],</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dominica"</span>: [<span class="st">"dominican"</span>,</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"dominican commonwealth"</span>],</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"eswatini"</span>: [<span class="st">"swazi"</span>],</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"fiji"</span>: [<span class="st">"fijian"</span>],</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gambia"</span>: [<span class="st">"gambian"</span>],</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ghana"</span>: [<span class="st">"ghanaian"</span>],</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"grenada"</span>: [<span class="st">"grenadian"</span>],</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"guyana"</span>: [<span class="st">"guyanese"</span>],</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"india"</span>: [<span class="st">"indian"</span>],</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"jamaica"</span>: [<span class="st">"jamaican"</span>],</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"kenya"</span>: [<span class="st">"kenyan"</span>],</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"kiribati"</span>: [<span class="st">"i-kiribati"</span>],</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lesotho"</span>: [<span class="st">"mosotho"</span>, </span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>                <span class="st">"basotho"</span>],</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">"malawi"</span>: [<span class="st">"malawian"</span>],</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">"malaysia"</span>: [<span class="st">"malaysian"</span>],</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">"maldives"</span>: [<span class="st">"maldivian"</span>],</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">"malta"</span>: [<span class="st">"maltese"</span>],</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mauritius"</span>: [<span class="st">"mauritian"</span>],</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mozambique"</span>: [<span class="st">"mozambican"</span>],</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">"namibia"</span>: [<span class="st">"namibian"</span>],</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nauru"</span>: [<span class="st">"nauruan"</span>],</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    <span class="st">"new zealand"</span>: [<span class="st">"new zealander"</span>, </span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"kiwi"</span>],</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nigeria"</span>: [<span class="st">"nigerian"</span>],</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">"pakistan"</span>: [<span class="st">"pakistani"</span>],</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">"papua new guinea"</span>: [<span class="st">"papuan"</span>, </span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"guinean"</span>],</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rwanda"</span>: [<span class="st">"rwandan"</span>],</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>    <span class="st">"saint lucia"</span>: [<span class="st">"saint lucian"</span>],</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    <span class="st">"samoa"</span>: [<span class="st">"samoan"</span>],</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    <span class="st">"seychelles"</span>: [<span class="st">"seychellois"</span>],</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sierra leone"</span>: [<span class="st">"sierra leonean"</span>],</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    <span class="st">"singapore"</span>: [<span class="st">"singaporean"</span>],</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    <span class="st">"solomon islands"</span>: [<span class="st">"solomon islander"</span>],</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    <span class="st">"south africa"</span>: [<span class="st">"south african"</span>],</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sri lanka"</span>: [<span class="st">"sri lankan"</span>],</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    <span class="st">"st kitts and nevis"</span>: [<span class="st">"kittitian"</span>, <span class="st">"nevisian"</span>],</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    <span class="st">"st vincent and the grenadines"</span>: [<span class="st">"vincentian"</span>],</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tanzania"</span>: [<span class="st">"tanzanian"</span>],</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tonga"</span>: [<span class="st">"tongan"</span>],</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    <span class="st">"trinidad and tobago"</span>: [<span class="st">"trinidadian"</span>, </span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"tobagonian"</span>],</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tuvalu"</span>: [<span class="st">"tuvaluan"</span>],</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    <span class="st">"uganda"</span>: [<span class="st">"ugandan"</span>],</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>    <span class="st">"united kingdom"</span>: [<span class="st">"british"</span>, </span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"english"</span>, </span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"scottish"</span>, </span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"welsh"</span>, </span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"northern irish"</span>],</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>    <span class="st">"vanuatu"</span>: [<span class="st">"vanuatuan"</span>],</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>    <span class="st">"zambia"</span>: [<span class="st">"zambian"</span>],</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="checking-citizenship-and-allegiance-to-the-sovereign-with-allegiance_test" class="level4">
+<h4 class="anchored" data-anchor-id="checking-citizenship-and-allegiance-to-the-sovereign-with-allegiance_test">Checking citizenship and allegiance to the sovereign with <code>allegiance_test()</code></h4>
+<p>With this list in place, I next need to code a function that can check a defendant’s citizenship attribute against this dictionary to determine whether they owe the sovereign allegiance. Because a defendant’s citizenship is generally an attribute about them and not about the offence’s facts, it makes sense to turn this into a <code>Defendant</code> attribute. But because the allegiance question so rarely comes up, future iterations of the Defendant class may move this function into an <code>Offence</code> function or out into the general namespace.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> allegiance_test(<span class="va">self</span>):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Determines whether a defendant owes allegiance to the sovereign based</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">    on their citizenship. The method iterates over the list of citizenships</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">    and checks each one. If the individual has "dominican" citizenship, </span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">    the program must further determine whether the individual is a citizen</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">    of Dominica (Commonwealth) or the Dominican Republic (not Commonwealth).</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">    For "dominican" citizenship, it invokes the _handle_dominican method to handle</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">    the special case. For other citizenships, it checks if they are Commonwealth</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">    using the _is_commonwealth_citizen method.</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">    If it finds Commonwealth citizenship, it immediately returns True. If none </span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">    of the citizenships are Commonwealth, it returns False. If the citizenship list is </span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">    empty or not provided, it also returns False.</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">        bool: True if the defendant has Commonwealth citizenship, False otherwise.</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="va">self</span>.citizenship:</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, citizenship <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="va">self</span>.citizenship):</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> citizenship.lower() <span class="op">==</span> <span class="st">"dominican"</span>:</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.citizenship[i] <span class="op">=</span> <span class="va">self</span>._handle_dominican()</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>                citizenship <span class="op">=</span> <span class="va">self</span>.citizenship[i]  <span class="co"># update citizenship value with new string</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>._is_commonwealth_citizen(citizenship):</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="private-support-functions-_is_commonwealth_citizen-and-_handle_dominican" class="level4">
+<h4 class="anchored" data-anchor-id="private-support-functions-_is_commonwealth_citizen-and-_handle_dominican">Private support functions <code>_is_commonwealth_citizen()</code> and <code>_handle_dominican()</code></h4>
+<p>Testing for a defendant’s allegiance contemplates two private methods: namely, the <code>_handle_dominican()</code> method and the <code>_is_commonwealth_citizen()</code> method. <code>_is_commonwealth_citizen()</code> checks whether a given citizenship belongs to a Commonwealth country, while <code>_handle_dominican()</code> prompts the user for more input if a defendant has “dominican” citizenship. This is because a “Dominican” citizen may be from the Dominican Republic, which is not a Commonwealth country, or Dominica, which is. I’ve coded these methods as follows:</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _is_commonwealth_citizen(<span class="va">self</span>, citizenship):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">        A private method that checks if a given citizenship belongs to a </span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">        Commonwealth country.</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">            citizenship (str): The citizenship string to check. This should be a </span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">            lowercase string that denotes a country or its demonym.</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">        Returns:</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">            bool: True if the citizenship is in the list of Commonwealth countries </span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">            or demonyms, False otherwise.</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">        Note:</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">            This method assumes that `COMMONWEALTH_DEMONYMS` is a dictionary </span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">            available in the global scope, where the keys are countries and </span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">            the values are lists of associated demonyms.</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">any</span>(citizenship.lower() <span class="kw">in</span> demonyms <span class="cf">for</span> demonyms <span class="kw">in</span> COMMONWEALTH_DEMONYMS.values())</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _handle_dominican(<span class="va">self</span>):</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">        This is a private method that checks if a "dominican" citizenship belongs </span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co">        to the Commonwealth country Dominica or the non-Commonwealth country, </span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="co">        the Dominican Republic.</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="co">            index (int): The "dominican" citizenship index in the citizenship list.</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="co">        Returns:</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="co">            None</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="st">"Are you from (1) Dominica or (2) the Dominican Republic?"</span>)</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>            response <span class="op">=</span> <span class="bu">input</span>(<span class="st">"Please enter 1 or 2: "</span>).strip()</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> response <span class="op">==</span> <span class="st">"1"</span>:</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="st">"dominican commonwealth"</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> response <span class="op">==</span> <span class="st">"2"</span>:</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="st">"dominican not commonwealth"</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="st">"Invalid input. Please enter 1 or 2."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="aircraft-spacecraft-the-space-station-and-the-moon" class="level3">
+<h3 class="anchored" data-anchor-id="aircraft-spacecraft-the-space-station-and-the-moon">Aircraft, spacecraft, the space station and the moon</h3>
+<p>The final step in settling jurisdiction is to deal with offences committed on aircraft, spacecraft, the ISS, the Lunar Gateway, or the lunar surface. Although the high treason system uses the code here, it may have a broader application later within future <em>Criminal Code</em> offences. This general application notwithstanding, this jurisdictional section is unlikely to capture much criminal activity.</p>
+<p>Conceptually, these different locales are divisible into two distinct groups:</p>
+<ul>
+<li>Aircraft offences</li>
+<li>Spacecraft, the ISS, the Lunar Gateway, and the lunar surface</li>
+</ul>
+<p>The main difference between these two groups is the Partner State consideration in the latter group.</p>
+<section id="cc-s-71-offences-committed-on-aircraft" class="level4">
+<h4 class="anchored" data-anchor-id="cc-s-71-offences-committed-on-aircraft">CC s 7(1) — Offences committed on aircraft</h4>
+<blockquote class="blockquote">
+<pre><code>Notwithstanding anything in this Act or any other Act, every one who
+
+     (a) on or in respect of an aircraft
+
+          (i) registered in Canada under regulations made under the Aeronautics Act, or
+          (ii) leased without crew and operated by a person who is qualified under regulations made under the Aeronautics Act to be registered as owner of an aircraft registered in Canada under those regulations,
+
+  while the aircraft is in flight, or
+
+      (b) on any aircraft, while the aircraft is in flight if the flight terminated in Canada,
+
+commits an act or omission in or outside Canada that if committed in Canada would be an offence punishable by indictment shall be deemed to have committed that act or omission in Canada.</code></pre>
+</blockquote>
+</section>
+<section id="testing-for-constructive-jurisdiction-via-aircarft-using-verify_constructive_jurisdiction_aircraft" class="level4">
+<h4 class="anchored" data-anchor-id="testing-for-constructive-jurisdiction-via-aircarft-using-verify_constructive_jurisdiction_aircraft">Testing for constructive jurisdiction via aircarft using <code>verify_constructive_jurisdiction_aircraft()</code></h4>
+<p>To deal with the complexities of jurisdiction for offences committed in aircraft, verify_constructive_jurisdiction_aircraft() tests for constructive jurisdiction. The <em>Criminal Code</em> for aircraft establishes Canadian jurisdiction when an aircraft is registered in Canada, terminates in Canada, or is legally leased in Canada, per the following control flow:</p>
+<ul>
+<li>The defendant is deemed to have committed an offence in Canada if:
+<ul>
+<li>The defendant committed an offence on an aircraft in flight AND</li>
+<li>The aircraft was registered in Canada under regulations made under the Aeronautics Act OR</li>
+<li>The aircraft was leased without crew AND operated by a person who is qualified under regulations made under the Aeronautics Act to be registered as the owner of an aircraft registered in Canada under those regulations OR</li>
+<li>The flight terminated in Canada</li>
+</ul></li>
+</ul>
+<p>I’ve codified this control flow as a <code>Facts</code> class method, adding constructive jurisdiction to a case’s facts if sufficient facts exist to do so.</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> verify_constructive_jurisdiction_aircraft(<span class="va">self</span>):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Verifies whether an offence committed on an aircraft falls under Canadian jurisdiction and updates the jurisdiction attribute accordingly.</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">    This method asks the user a series of questions to determine if the offence falls under the Canadian statute when committed on an aircraft. If it does, the jurisdiction is updated to include the specific location.</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Note:</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">        This method uses the `input` function in an interactive context.</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    deemed_jurisdiction <span class="op">=</span> []</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    offense_committed <span class="op">=</span> verify_yes_no(<span class="st">"Was the offense committed on an aircraft in flight? (yes/no): "</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    aircraft_registered <span class="op">=</span> aircraft_leased <span class="op">=</span> qualified_operator <span class="op">=</span> flight_terminated <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> offense_committed:</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        flight_terminated <span class="op">=</span> verify_yes_no(<span class="st">"Did the flight terminate in Canada? (yes/no): "</span>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        aircraft_registered <span class="op">=</span> verify_yes_no(<span class="st">"Is the aircraft</span><span class="ch">\n</span><span class="st"> * Registered in Canada under regulations made under the Aeronautics Act? (yes/no): "</span>)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        aircraft_leased <span class="op">=</span> verify_yes_no(<span class="st">" * Leased without crew operated by a person qualified under regulations made under the Aeronautics Act to be registered as owner of an aircraft registered in Canada under those regulations? (yes/no): "</span>)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> aircraft_leased:</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        qualified_operator <span class="op">=</span> verify_yes_no(<span class="st">" * Operated by a person who is qualified under regulations made under the Aeronautics Act to be registered as owner of an aircraft registered in Canada under those regulations? (yes/no): "</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> aircraft_registered:</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        deemed_jurisdiction.append(<span class="st">"deemed jurisdiction (legally registered aircraft)"</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> aircraft_leased <span class="kw">and</span> qualified_operator:</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>        deemed_jurisdiction.append(<span class="st">"deemed jurisdiction (legally leased and operated aircraft)"</span>)</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> flight_terminated:</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        deemed_jurisdiction.append(<span class="st">"deemed jurisdiction (flight terminated in Canada)"</span>)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> item <span class="kw">in</span> deemed_jurisdiction:</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> item <span class="kw">not</span> <span class="kw">in</span> <span class="va">self</span>.jurisdiction:</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.jurisdiction.append(item)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="cc-s-72.3-space-station-canadian-crew-members" class="level4">
+<h4 class="anchored" data-anchor-id="cc-s-72.3-space-station-canadian-crew-members">CC s 7(2.3) — Space Station — Canadian crew members</h4>
+<p>This section applies to Canadian crew members during space flights involving the International Space Station. The <em>Criminal Code</em> deems any action or inaction by a Canadian crew member during such flights that would constitute an indictable offence in Canada to have been committed within Canada.</p>
+<blockquote class="blockquote">
+<pre><code>Despite anything in this Act or any other Act, a Canadian crew member who, during a space flight, commits an act or omission outside Canada that if committed in Canada would constitute an indictable offence is deemed to have committed that act or omission in Canada, if that act or omission is committed
+
+       (a) on, or in relation to, a flight element of the Space Station; or
+       (b) on any means of transportation to or from the Space Station.</code></pre>
+</blockquote>
+</section>
+<section id="cc-s-72.31-space-station-crew-members-of-partner-states" class="level4">
+<h4 class="anchored" data-anchor-id="cc-s-72.31-space-station-crew-members-of-partner-states">CC s 7(2.31) — Space Station — crew members of Partner States</h4>
+<p>This section expands the principle to include Partner States crew members and applies when a defendant commits an act or omission that would constitute an indictable offence in Canada during a space flight involving the International Space Station.</p>
+<blockquote class="blockquote">
+<pre><code>Despite anything in this Act or any other Act, a crew member of a Partner State who commits an act or omission outside Canada during a space flight on, or in relation to, a flight element of the Space Station or on any means of transportation to and from the Space Station that if committed in Canada would constitute an indictable offence is deemed to have committed that act or omission in Canada, if that act or omission
+
+       (a) threatens the life or security of a Canadian crew member; or
+       (b) is committed on or in relation to, or damages, a flight element provided by Canada.</code></pre>
+</blockquote>
+</section>
+<section id="cc-s-72.35-lunar-gateway-canadian-crew-members" class="level4">
+<h4 class="anchored" data-anchor-id="cc-s-72.35-lunar-gateway-canadian-crew-members">CC s 7(2.35) — Lunar Gateway — Canadian crew members</h4>
+<p>Similar provisions apply to Canadian crew members during space flights involving the Lunar Gateway or the lunar surface.</p>
+<blockquote class="blockquote">
+<pre><code>Despite anything in this Act or any other Act, a Canadian crew member who, during a space flight, commits an act or omission outside Canada that if committed in Canada would constitute an indictable offence is deemed to have committed that act or omission in Canada, if that act or omission is committed
+
+   (a) on, or in relation to, a flight element of the Lunar Gateway;
+
+   (b) on any means of transportation to or from the Lunar Gateway; or
+
+   (c) on the surface of the Moon.</code></pre>
+</blockquote>
+</section>
+<section id="cc-s-72.36-lunar-gateway-crew-members-of-partner-states" class="level4">
+<h4 class="anchored" data-anchor-id="cc-s-72.36-lunar-gateway-crew-members-of-partner-states">CC s 7(2.36) — Lunar Gateway — crew members of Partner States</h4>
+<p>Finally, crew members of Partner States involved in space flights to or from the Lunar Gateway or on the lunar surface are subject to the same principles of constructive jurisdiction if their actions or omissions would constitute an indictable offence in Canada.</p>
+<blockquote class="blockquote">
+<pre><code>Despite anything in this Act or any other Act, a crew member of a Partner State who commits an act or omission outside Canada during a space flight on, or in relation to, a flight element of the Lunar Gateway, on any means of transportation to and from the Lunar Gateway or on the surface of the Moon that if committed in Canada would constitute an indictable offence is deemed to have committed that act or omission in Canada, if that act or omission
+
+   (a) threatens the life or security of a Canadian crew member; or
+
+   (b) is committed on or in relation to, or damages, a flight element provided by Canada.</code></pre>
+</blockquote>
+<p>This decision tree structure outlines the conditions that would extend Canadian jurisdiction to actions committed in space, including the International Space Station (ISS), Lunar Gateway, and the lunar surface. The control flow starts with determining whether the actor is a member or authorized agent of a Partner State.</p>
+<p>Under this structure, for each possible location (ISS, en route to/from ISS, Lunar Gateway, en route to/from Lunar Gateway, and the lunar surface), the methods consider a range of offences, including actions that threaten the life or security of a Canadian crew member, damage a flight element provided by Canada, or are conducted concerning such a flight element:</p>
+<ul>
+<li>Verify if the actor is a member or authorized agent of a Partner State.</li>
+<li>If yes, determine the location of the offence (ISS, en route to/from ISS, Lunar Gateway, en route to/from Lunar Gateway, lunar surface).</li>
+<li>At each location, check if the defendant committed an offence which:
+<ul>
+<li>Threatens the life or security of a Canadian crew member,</li>
+<li>Is in relation to or damages a flight element provided by Canada.</li>
+</ul></li>
+</ul>
+</section>
+<section id="determining-constructive-jurisdiction-in-space-using-verify_constructive_jurisdiction_space" class="level4">
+<h4 class="anchored" data-anchor-id="determining-constructive-jurisdiction-in-space-using-verify_constructive_jurisdiction_space">Determining constructive jurisdiction in space using <code>verify_constructive_jurisdiction_space()</code></h4>
+<p>The complexity of these control flows requires a systematic approach to determining jurisdiction. The verify_constructive_jurisdiction_space() facilitates this purpose by prompting the user with questions to assess whether a crew member’s actions fall within Canadian jurisdiction according to the criteria outlined in these sections. The function itself encapsulates our decision tree. The corresponding method assesses each offence and location if the defendant is a Partner State member:</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> verify_constructive_jurisdiction_space(<span class="va">self</span>):</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>        <span class="co"># List of possible locations</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        locations <span class="op">=</span> [<span class="st">"on the iss"</span>, </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"en route to iss"</span>, </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"on the lunar gateway"</span>, </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"en route to/from Lunar Gateway"</span>, </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"on the lunar surface"</span>]</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Combine all offences into one list</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        all_offences <span class="op">=</span> [<span class="st">"threatend a canadian crew member's life"</span>, </span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"threatend a canadian crew member's security"</span>, </span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"damaged a canadian flight element"</span>, </span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"offended in relation to a canadian flight element"</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"damaged a canadian flight element"</span>]</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        partner_state_member <span class="op">=</span> <span class="va">self</span>._verify_partner_state(defendant.agency)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> partner_state_member:</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> offence <span class="kw">in</span> all_offences:</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"The defendant </span><span class="sc">{</span>offence<span class="sc">}</span><span class="ss"> — (yes/no): "</span>)</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>                offence_committed <span class="op">=</span> <span class="bu">input</span>().lower()</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> offence_committed <span class="op">==</span> <span class="st">'yes'</span>:</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">for</span> location <span class="kw">in</span> locations:</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">print</span>(<span class="ss">f"Did the offence take place </span><span class="sc">{</span>location<span class="sc">}</span><span class="ss">? (yes/no): "</span>)</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>                        offence_location <span class="op">=</span> <span class="bu">input</span>().lower()</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">if</span> offence_location <span class="op">==</span> <span class="st">'yes'</span>:</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>                            <span class="va">self</span>.jurisdiction.append(<span class="ss">f"deemed jurisdiction (</span><span class="sc">{</span>offence<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>location<span class="sc">}</span><span class="ss">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="assessing-partner-state-membership-using-_verify_partner_state" class="level4">
+<h4 class="anchored" data-anchor-id="assessing-partner-state-membership-using-_verify_partner_state">Assessing Partner State membership using <code>_verify_partner_state()</code></h4>
+<p>The code above contemplates a private <code>_verify_partner_state()</code> function and an <code>agency</code> variable. Partner State membership is not tied to citizenship. Instead, a person is statutorily a member of a Partner State if they are a crew member of a Partner State. To the extent that a person can be a crew member acting for a Partner State and not a citizen of that country, the two are conceptually distinct through an <code>agency</code> variable.</p>
+<p>To verify Partner States, however, I must first outline what constitutes a Partner State.</p>
+</section>
+<section id="cc-s-72.34-definition-partner-states" class="level4">
+<h4 class="anchored" data-anchor-id="cc-s-72.34-definition-partner-states">CC s 7(2.34) — definition: Partner States</h4>
+<blockquote class="blockquote">
+<p><strong>Agreement</strong> has the same meaning as in section 2 of the <em>Civil International Space Station Agreement Implementation Act</em>.</p>
+<p>…</p>
+<p><strong>Partner State</strong> means a State, other than Canada, who contracted to enter into the Agreement and for which the Agreement has entered into force in accordance with article 25 of the Agreement.</p>
+</blockquote>
+<p>The pertinent section of <em>Civil International Space Station Agreement Implementation Act</em> art 25 reads as follows:</p>
+<blockquote class="blockquote">
+<ol type="1">
+<li>This Agreement shall remain open for signature by the States listed in the Preamble of this Agreement.</li>
+</ol>
+</blockquote>
+<p>The Preamble then outlines the fact that Partner States are</p>
+<blockquote class="blockquote">
+<p>An Act to implement the Agreement among the Government of Canada, Governments of Member States of the European Space Agency, the Government of Japan, the Government of the Russian Federation, and the Government of the United States of America concerning Cooperation on the Civil International Space Station and to make related amendments to other Acts.</p>
+</blockquote>
+<p>Given the above information, a partner state is:</p>
+<ul>
+<li>Canada</li>
+<li>Japan;</li>
+<li>The Russian Federation;</li>
+<li>The United States of America; or</li>
+<li>A member state of the ESA</li>
+</ul>
+<p>ESA member states include:</p>
+<ul>
+<li>Austria</li>
+<li>Belgium</li>
+<li>Czech Republic</li>
+<li>Denmark</li>
+<li>Estonia</li>
+<li>Finland</li>
+<li>France</li>
+<li>Germany</li>
+<li>Greece</li>
+<li>Hungary</li>
+<li>Ireland</li>
+<li>Italy</li>
+<li>Luxembourg</li>
+<li>Netherlands</li>
+<li>Norway</li>
+<li>Poland</li>
+<li>Portugal</li>
+<li>Romania</li>
+<li>Spain</li>
+<li>Sweden</li>
+<li>Switzerland</li>
+<li>United Kingdom</li>
+</ul>
+<p>These can be expressed as Python dictionaries, just as I did with the Commonwealth countries above:</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>NON_ESA_PARTNER_STATE_DEMONYMS <span class="op">=</span> {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"canada"</span>: (<span class="st">"canadian"</span>,),</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"japan"</span>: (<span class="st">"japanese"</span>,),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"russian federation"</span>: (<span class="st">"russian"</span>,),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"united states of america"</span>: (<span class="st">"american"</span>,)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>ESA_PARTNER_STATE_DEMONYMS <span class="op">=</span> {</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"austria"</span>: (<span class="st">"austrian"</span>,),</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"belgium"</span>: (<span class="st">"belgian"</span>,),</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"czech republic"</span>: (<span class="st">"czech"</span>, <span class="st">"czechoslovakian"</span>),</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"denmark"</span>: (<span class="st">"danish"</span>,),</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"estonia"</span>: (<span class="st">"estonian"</span>,),</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"finland"</span>: (<span class="st">"finnish"</span>,),</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"france"</span>: (<span class="st">"french"</span>,),</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"germany"</span>: (<span class="st">"german"</span>,),</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"greece"</span>: (<span class="st">"greek"</span>,),</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hungary"</span>: (<span class="st">"hungarian"</span>,),</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ireland"</span>: (<span class="st">"irish"</span>,),</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"italy"</span>: (<span class="st">"italian"</span>,),</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"luxembourg"</span>: (<span class="st">"luxembourger"</span>,),</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"netherlands"</span>: (<span class="st">"dutch"</span>,),</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"norway"</span>: (<span class="st">"norwegian"</span>,),</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"poland"</span>: (<span class="st">"polish"</span>,),</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"portugal"</span>: (<span class="st">"portuguese"</span>,),</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"romania"</span>: (<span class="st">"romanian"</span>,),</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"spain"</span>: (<span class="st">"spanish"</span>,),</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sweden"</span>: (<span class="st">"swedish"</span>,),</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">"switzerland"</span>: (<span class="st">"swiss"</span>,),</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">"united kingdom"</span>: (<span class="st">"british"</span>, <span class="st">"scottish"</span>, <span class="st">"english"</span>, <span class="st">"welsh"</span>, <span class="st">"irish"</span>)</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="checking-partner-state-membership-using-_verify_partner_state" class="level4">
+<h4 class="anchored" data-anchor-id="checking-partner-state-membership-using-_verify_partner_state">Checking Partner State membership using <code>_verify_partner_state()</code></h4>
+<p>Once the Partner States are archived in the dictionary, we need a method to determine whether a particular defendant’s agency variable correlates to a Partner State value:</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _verify_partner_state(<span class="va">self</span>, memberships):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">        This is a private method that checks if any given citizenship belongs to a </span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">        Partner State country.</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">            citizenships (list): The list of citizenships to check. Each should be a </span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">            lowercase string that denotes a country or its demonym.</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">        Returns:</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">            bool: True if any of the citizenships is in the list of Partner States' countries </span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="co">            or demonyms, False otherwise.</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Convert the dictionary values (which are tuples) into sets for easy searching</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>        non_esa_demonyms <span class="op">=</span> <span class="bu">set</span>(val <span class="cf">for</span> sublist <span class="kw">in</span> NON_ESA_PARTNER_STATE_DEMONYMS.values() <span class="cf">for</span> val <span class="kw">in</span> sublist)</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>        esa_demonyms <span class="op">=</span> <span class="bu">set</span>(val <span class="cf">for</span> sublist <span class="kw">in</span> ESA_PARTNER_STATE_DEMONYMS.values() <span class="cf">for</span> val <span class="kw">in</span> sublist)</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> membership <span class="kw">in</span> memberships:</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> membership <span class="kw">in</span> non_esa_demonyms <span class="kw">or</span> membership <span class="kw">in</span> esa_demonyms:</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="jurisdiction-verification-through-verify_high_treason" class="level2">
+<h2 class="anchored" data-anchor-id="jurisdiction-verification-through-verify_high_treason">Jurisdiction verification through <code>verify_high_treason()</code></h2>
+<p>The final step is to code a function that will check to determine whether there is jurisdiction for an offence by checking both <code>Facts</code> and <code>Defendant</code> objects to see whether the jurisdictional preconditions are met. Because high treason has its own form of constructive jurisdiction, the control flow will have to account for that:</p>
+<ul>
+<li>Is the offence committed in Canada?
+<ul>
+<li>Is the defendant jurisdictionally exempt?</li>
+<li>Can jurisdiction be constructed?
+<ul>
+<li>Aircraft jurisdiction</li>
+<li>Space jurisdiction</li>
+</ul></li>
+<li>Is the offence treason?
+<ul>
+<li>Does the defendant owe allegiance to Canada?</li>
+</ul></li>
+</ul></li>
+</ul>
+<p>The <code>verify_high_treason()</code> function determines whether the offence is made out. The previous <code>verify_high_treason()</code> function simply checked to see if <code>matches</code> had any content. If it did, it would print them out. But jurisdiction introduces a new issue: we can’t say a defendant committed high treason unless we also establish that the offence occurred <em>in Canada</em>. We must expand ``verify_high_treason()```’s scope to do this. For now, this function is class-independent.[^2]</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> verify_high_treason(matches, facts, defendant):</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Determines whether the factual and legal matrix is sufficient to make out </span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">    high treason.</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    reasons <span class="op">=</span> []</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> matches:</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        reasons.append(<span class="st">"* No wrongful act"</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check allegiance</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> defendant.allegiance_test():</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        reasons.append(<span class="st">"* Defendant does not owe allegiance to the sovereign"</span>)</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If defendant doesn't owe allegiance, then we also check for jurisdiction</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> defendant.allegiance_test() <span class="kw">and</span> facts.jurisdiction <span class="op">==</span> <span class="st">"not recognized"</span>:</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>        reasons.append(<span class="st">"* No jurisdiction"</span>)</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If there are any reasons in the list, print them out. </span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Otherwise, high treason has been committed.</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> reasons:</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"High treason not committed:"</span>)</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> reason <span class="kw">in</span> reasons:</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(reason)</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"High treason committed. Matches:"</span>)</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> match <span class="kw">in</span> matches:</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(match)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>The basic statutory expert system now accounts for jurisdiction and high treason’s offence elements. The next step will be to create functions that allow the program to deal with case law, interpretive ambiguities, and legal uncertainties.</p>
+<p>In the first post, I cited high treason’s limited case law base as a reason for building an expert system around it. Because case law introduces new legal rules, nuances, definitions, and applications, accounting for case law necessarily complicates statutory interpretation control flow. Bypassing these complications for a minimally-viable product is a sensible way to start. But once we have that MVP, we need a system that accounts for legal ambiguities and tells the user when more than one conclusion is possible. Because high treason has limited court consideration, these potential complications will be much fewer than those introduced in frequently-charged offences.</p>
+<p>[^1] As the system develops, jurisdiction may become a more significant issue. If that proves to be the case, jurisdictional functions will likely have to move to a separate class. For now, treating them as just another fact makes sense. [^2] See note 1 above. The same logic applies to stray functions that deal with individual offences. How these are best dealt with is still very much to be determined.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

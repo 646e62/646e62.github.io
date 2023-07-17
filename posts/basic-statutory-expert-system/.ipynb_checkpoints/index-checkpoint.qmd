@@ -1,10 +1,11 @@
 ---
-title: "A basic statutory expert system"
+title: "BSES part 1: a basic statutory expert system"
 author: "Daniel Booy"
 date: "2023-06-24"
-categories: [article, code, analysis]
+date-modified: "2023-06-25"
+categories: [article, code, analysis, bses]
 image: "ai.png"
-abstract: "Despite advances in generative AI, expert legal systems will continue to be necessary for legal tech and its applications. These systems can anticipate the hallucinations that generative AIs produce, guide them by prompting them along a control flow, and easily expose the logic underlying a legal AI's decision. In this post I outline a simple and intuitively-coded expert system that addresses, at a very high level, a narrow, basic legal problem: whether a criminal defendant is guilty of high treason."
+abstract: "Despite advances in generative AI, expert legal systems will continue to be necessary for legal tech and its applications. These systems can anticipate the hallucinations that generative AIs produce, guide them by prompting them along a control flow, and easily expose the logic underlying a legal AI's decision. In this post I outline a high level basic statutory expert system (BSES) that answers a narrow, basic legal problem: whether a criminal defendant is guilty of high treason."
 ---
 
 # Introduction
@@ -295,11 +296,6 @@ I've used the following AI tools to help create this project:
 * **Code.** ChatGPT-3.5 & 4, GitHub Copilot (GPT-3.5 based)
 * **Legal research.** CanLII (non-generative)
 * **Images.** DALL-E
-
-# Updates
-
-* 2023-06-25: Finished adding code and ensured the program was minimally operable
-
 
 [^bna_paper]: See <http://www.doc.ic.ac.uk/~rak/papers/British%20Nationality%20Act.pdf>
 [^bna_paper_reaction]: See e.g. [AI & Law: British Nationality Act Unexpectedly Spurred AI And Law](https://lance-eliot.medium.com/ai-law-british-nationality-act-unexpectedly-spurred-ai-and-law-404aea03386a), [How the British Nationality Act Served to Inadvertently Spur AI and the Law](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3975784).

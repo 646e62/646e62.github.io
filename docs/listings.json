@@ -2,8 +2,9 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/bses-2-jurisdiction/index.html",
       "/posts/basic-statutory-expert-system/index.html",
-      "/posts/welcome/index.html"
+      "/posts/todo/index.html"
     ]
   }
 ]
