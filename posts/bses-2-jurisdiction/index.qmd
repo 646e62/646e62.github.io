@@ -40,17 +40,92 @@ CANADIAN_TERRITORIES: dict[str, tuple[str, str]] = {
 
 ## Jurisdiction verification
 
-With that preliminary jurisdictional matrix implemented, the next step is determining whether the jurisdiction entered matches one of the geographical Canadian jurisdictions. Legal jurisdiction is not something inherent to the offence itself or the defendant. Rather, jurisdiction is primarily determined based on the location of the crime. It therefore makes sense to situate jurisdictional functions within the ```Facts``` class.[^1]
+With that preliminary jurisdictional matrix implemented, the next step is determining whether the jurisdiction entered matches one of the geographical Canadian jurisdictions. Legal jurisdiction is not something inherent to the offence itself or the defendant. Rather, jurisdiction is primarily determined based on the location of the crime. It therefore makes sense to situate jurisdictional functions within the ```Facts``` class.[^facts_jurisdiction]
 
 ### Handling geographic jurisdiction via ```verify_canadian_jurisdiction()```
 
 The verify_canadian_jurisdiction() function checks whether the given jurisdiction string matches any Canadian provincial, territorial, or federal jurisdiction. If so, the function determines that the offence occurred "in Canada," thus making out general jurisdiction.
+
+```{python}
+    from typing import Optional
+    def verify_canadian_jurisdiction(self,
+                                     jurisdiction: str, 
+                                     provinces: dict[str, tuple[str, str]] = CANADIAN_PROVINCES, 
+                                     territories: dict[str, tuple[str, str]] = CANADIAN_TERRITORIES) -> tuple[bool, Optional[str]]:
+        """
+        This function checks if a given jurisdiction is Canadian.
+
+        The function accepts a string representing a jurisdiction and two 
+        optional dictionaries representing provinces and territories. Each 
+        dictionary maps a region's name to a tuple consisting of its 
+        abbreviation and French translation. The function checks if the 
+        jurisdiction matches the name, abbreviation, or French translation of 
+        any of the provinces or territories. The function also checks if the 
+        jurisdiction is "canada" or its abbreviation "ca".
+
+        If the program finds a match, the function returns True; otherwise, it returns 
+        False.
+
+        Args:
+            jurisdiction (str): The jurisdiction to check.
+            provinces (dict[str, tuple[str, str]], optional): A dictionary of 
+            Canadian provinces. Defaults to CANADIAN_PROVINCES.
+            territories (dict[str, tuple[str, str]], optional): A dictionary of
+            Canadian territories. Defaults to CANADIAN_TERRITORIES.
+
+        Returns:
+            tuple[bool, Optional[str]]: A tuple where the first element is a 
+            boolean indicating if the jurisdiction is recognized, and the 
+            second element is an optional string message.
+        """
+        
+        if jurisdiction.lower() in ('canada', 'ca'):
+            return True
+
+        for region in [provinces, territories]:
+            for key, value in region.items():
+                if jurisdiction.lower() in [key.lower(), value[0].lower(), value[1].lower()]:
+                    return True
+        return False
+        
+```
 
 ### User-generated facts via ```create_facts()```
 
 Previously, the ```create_facts``` function was part of the main.py program execution file. While this was sufficient for a minimally-viable product, more workable solutions exist. For example, there will be times when we want the program to run without having to go through a lengthy checklist of questions, especially when the user may enter that information directly into a ```Facts``` class object. 
 
 For now, the ```create_facts``` method can continue to have ```high_treason_facts``` assigned to it through hard coding. I will eventually start siphoning off processes related to high treason and other offences into separate functions and possibly a separate ```Offence``` class.
+
+```{python}
+       def create_facts(self):
+        """
+        Interactively collects details about the offence and stores them as instance attributes.
+
+        This method asks the user for details about the victim, offence date, jurisdiction, and actions related to the offence. 
+        The program stores these details as instance attributes for future use.
+        
+        Note:
+            This method uses the `input` function interactively.
+        """
+        
+        print("Please enter the facts of the case:")
+
+        victim_category = input("Who is the victim? ")
+        victim_category = standardize_sovereign_names(victim_category)
+        victim_category = standardize_canada_names(victim_category)
+        complainant = Complainant(victim_category)
+
+        offence_date = input("Date of the offence (YYYY-MM-DD): ")
+        jurisdiction = input("Jurisdiction: ")
+        self.jurisdiction = self.verify_canadian_jurisdiction(jurisdiction)
+
+        actions = high_treason_facts(victim_category)
+
+        self.victim_category = complainant.name
+        self.offence_date = offence_date
+        self.actions = actions
+
+```
 
 ## Constructive jurisdiction
 
@@ -116,11 +191,11 @@ We can incorporate these questions into a simple UI method for the ```Defendant`
 
 #### CC 46(3) — Canadian citizen
 
->     Notwithstanding subsection (1) or (2), a Canadian citizen or a person who owes allegiance to Her Majesty in right of Canada,
+> Notwithstanding subsection (1) or (2), a Canadian citizen or a person who owes allegiance to Her Majesty in right of Canada,
 >
->         (a) commits high treason if, while in or out of Canada, he does anything mentioned in subsection (1); or
+>    (a) commits high treason if, while in or out of Canada, he does anything mentioned in subsection (1); or
 >
->         (b) commits treason if, while in or out of Canada, he does anything mentioned in subsection (2).
+>    (b) commits treason if, while in or out of Canada, he does anything mentioned in subsection (2).
 
 Because the statute doesn't define allegiance, I must make some assumptions. Primarily, I assume that a person owes allegiance to the sovereign iff they are a Commonwealth country citizen. If this theory holds, we can use a dictionary to check whether a defendant owes allegiance to the sovereign. This dictionary lists demonyms as values and tuples containing country names as keys. Because Canada is also a Commonwealth country, distinguishing the two programmatically is optional.
 
@@ -295,18 +370,18 @@ The main difference between these two groups is the Partner State consideration 
 
 #### CC s 7(1) — Offences committed on aircraft
 
->     Notwithstanding anything in this Act or any other Act, every one who
+> Notwithstanding anything in this Act or any other Act, every one who
+> 
+>    (a) on or in respect of an aircraft
 >
->          (a) on or in respect of an aircraft
+>        (i) registered in Canada under regulations made under the Aeronautics Act, or
+>        (ii) leased without crew and operated by a person who is qualified under regulations made under the Aeronautics Act to be registered as owner of an aircraft registered in Canada under those regulations,
 >
->               (i) registered in Canada under regulations made under the Aeronautics Act, or
->               (ii) leased without crew and operated by a person who is qualified under regulations made under the Aeronautics Act to be registered as owner of an aircraft registered in Canada under those regulations,
+>    while the aircraft is in flight, or
 >
->       while the aircraft is in flight, or
+>    (b) on any aircraft, while the aircraft is in flight if the flight terminated in Canada,
 >
->           (b) on any aircraft, while the aircraft is in flight if the flight terminated in Canada,
->
->     commits an act or omission in or outside Canada that if committed in Canada would be an offence punishable by indictment shall be deemed to have committed that act or omission in Canada.
+> commits an act or omission in or outside Canada that if committed in Canada would be an offence punishable by indictment shall be deemed to have committed that act or omission in Canada.
 
 #### Testing for constructive jurisdiction via aircarft using ```verify_constructive_jurisdiction_aircraft()```
 
@@ -360,41 +435,38 @@ def verify_constructive_jurisdiction_aircraft(self):
 
 This section applies to Canadian crew members during space flights involving the International Space Station. The *Criminal Code* deems any action or inaction by a Canadian crew member during such flights that would constitute an indictable offence in Canada to have been committed within Canada.
 
->     Despite anything in this Act or any other Act, a Canadian crew member who, during a space flight, commits an act or omission outside Canada that if committed in Canada would constitute an indictable offence is deemed to have committed that act or omission in Canada, if that act or omission is committed
+> Despite anything in this Act or any other Act, a Canadian crew member who, during a space flight, commits an act or omission outside Canada that if committed in Canada would constitute an indictable offence is deemed to have committed that act or omission in Canada, if that act or omission is committed
 >
->            (a) on, or in relation to, a flight element of the Space Station; or
->            (b) on any means of transportation to or from the Space Station.
+>    (a) on, or in relation to, a flight element of the Space Station; or
+>    (b) on any means of transportation to or from the Space Station.
 
 #### CC s 7(2.31) — Space Station — crew members of Partner States
 
 This section expands the principle to include Partner States crew members and applies when a defendant commits an act or omission that would constitute an indictable offence in Canada during a space flight involving the International Space Station.
 
->     Despite anything in this Act or any other Act, a crew member of a Partner State who commits an act or omission outside Canada during a space flight on, or in relation to, a flight element of the Space Station or on any means of transportation to and from the Space Station that if committed in Canada would constitute an indictable offence is deemed to have committed that act or omission in Canada, if that act or omission
+> Despite anything in this Act or any other Act, a crew member of a Partner State who commits an act or omission outside Canada during a space flight on, or in relation to, a flight element of the Space Station or on any means of transportation to and from the Space Station that if committed in Canada would constitute an indictable offence is deemed to have committed that act or omission in Canada, if that act or omission
 >
->            (a) threatens the life or security of a Canadian crew member; or
->            (b) is committed on or in relation to, or damages, a flight element provided by Canada.
+>    (a) threatens the life or security of a Canadian crew member; or
+>    (b) is committed on or in relation to, or damages, a flight element provided by Canada.
 
 #### CC s 7(2.35) — Lunar Gateway — Canadian crew members
 
 Similar provisions apply to Canadian crew members during space flights involving the Lunar Gateway or the lunar surface.
 
->     Despite anything in this Act or any other Act, a Canadian crew member who, during a space flight, commits an act or omission outside Canada that if committed in Canada would constitute an indictable offence is deemed to have committed that act or omission in Canada, if that act or omission is committed
+> Despite anything in this Act or any other Act, a Canadian crew member who, during a space flight, commits an act or omission outside Canada that if committed in Canada would constitute an indictable offence is deemed to have committed that act or omission in Canada, if that act or omission is committed
 >
->        (a) on, or in relation to, a flight element of the Lunar Gateway;
->
->        (b) on any means of transportation to or from the Lunar Gateway; or
->
->        (c) on the surface of the Moon.
+>    (a) on, or in relation to, a flight element of the Lunar Gateway;
+>    (b) on any means of transportation to or from the Lunar Gateway; or
+>    (c) on the surface of the Moon.
 
 #### CC s 7(2.36) — Lunar Gateway — crew members of Partner States
 
 Finally, crew members of Partner States involved in space flights to or from the Lunar Gateway or on the lunar surface are subject to the same principles of constructive jurisdiction if their actions or omissions would constitute an indictable offence in Canada.
 
->     Despite anything in this Act or any other Act, a crew member of a Partner State who commits an act or omission outside Canada during a space flight on, or in relation to, a flight element of the Lunar Gateway, on any means of transportation to and from the Lunar Gateway or on the surface of the Moon that if committed in Canada would constitute an indictable offence is deemed to have committed that act or omission in Canada, if that act or omission
+> Despite anything in this Act or any other Act, a crew member of a Partner State who commits an act or omission outside Canada during a space flight on, or in relation to, a flight element of the Lunar Gateway, on any means of transportation to and from the Lunar Gateway or on the surface of the Moon that if committed in Canada would constitute an indictable offence is deemed to have committed that act or omission in Canada, if that act or omission
 >
->        (a) threatens the life or security of a Canadian crew member; or
->
->        (b) is committed on or in relation to, or damages, a flight element provided by Canada.
+>    (a) threatens the life or security of a Canadian crew member; or
+>    (b) is committed on or in relation to, or damages, a flight element provided by Canada.
 
 This decision tree structure outlines the conditions that would extend Canadian jurisdiction to actions committed in space, including the International Space Station (ISS), Lunar Gateway, and the lunar surface. The control flow starts with determining whether the actor is a member or authorized agent of a Partner State.
 
@@ -573,7 +645,7 @@ The final step is to code a function that will check to determine whether there 
     * Is the offence treason?
         * Does the defendant owe allegiance to Canada?
 
-The ```verify_high_treason()``` function determines whether the offence is made out. The previous ```verify_high_treason()``` function simply checked to see if ```matches``` had any content. If it did, it would print them out. But jurisdiction introduces a new issue: we can't say a defendant committed high treason unless we also establish that the offence occurred *in Canada*. We must expand ``verify_high_treason()```'s scope to do this. For now, this function is class-independent.[^2]
+The ```verify_high_treason()``` function determines whether the offence is made out. The previous ```verify_high_treason()``` function simply checked to see if ```matches``` had any content. If it did, it would print them out. But jurisdiction introduces a new issue: we can't say a defendant committed high treason unless we also establish that the offence occurred *in Canada*. We must expand ``verify_high_treason()```'s scope to do this. For now, this function is class-independent.[^offence_jurisdiction]
 
 ```{python}
 def verify_high_treason(matches, facts, defendant):
@@ -615,5 +687,15 @@ The basic statutory expert system now accounts for jurisdiction and high treason
 
 In the first post, I cited high treason's limited case law base as a reason for building an expert system around it. Because case law introduces new legal rules, nuances, definitions, and applications, accounting for case law necessarily complicates statutory interpretation control flow. Bypassing these complications for a minimally-viable product is a sensible way to start. But once we have that MVP, we need a system that accounts for legal ambiguities and tells the user when more than one conclusion is possible. Because high treason has limited court consideration, these potential complications will be much fewer than those introduced in frequently-charged offences.
 
-[^1] As the system develops, jurisdiction may become a more significant issue. If that proves to be the case, jurisdictional functions will likely have to move to a separate class. For now, treating them as just another fact makes sense.
-[^2] See note 1 above. The same logic applies to stray functions that deal with individual offences. How these are best dealt with is still very much to be determined.
+[^facts_jurisdiction]: As the system develops, jurisdiction may become a more significant issue. If that proves to be the case, jurisdictional functions will likely have to move to a separate class. For now, treating them as just another fact makes sense.
+[^offence_jurisdiction]: See note 1 above. The same logic applies to stray functions that deal with individual offences. How I should best deal with these is still very much to be determined.
+
+# AI disclaimer
+
+I've used the following AI tools to help create this project:
+
+* **Spelling and grammar.** Grammarly (non-generative)
+* **Text summarization.** ChatGPT-3.5 & 4
+* **Code.** ChatGPT-3.5 & 4
+* **Legal research.** CanLII (non-generative), HeinOnline (non-generative)
+* **Images.** DALL-E
