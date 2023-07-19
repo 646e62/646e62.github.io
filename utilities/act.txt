@@ -1,0 +1,3 @@
+definitions = {
+    "act": "(\"Act includes\",\n\t\"(a) an Act of Parliament,\",\n\t\"(b) an Act of the legislature of the former Province of Canada,\",\n\t\"(c) an Act of the legislature of a province, and\",\n\t\"(d) an Act or ordinance of the legislature of a province, territory or place in force at the time that province, territory or place became a province of Canada.\", \"S’entend notamment :\",\n\t\"a) d’une loi fédérale\",\n\t\"b) d’une loi de la législature de l’ancienne province du Canada\",\n\t\"(c) an Act of the legislature of a province, andd) d’une loi ou ordonnance de la législature d’une province, d’un territoire ou d’un endroit, en vigueur au moment où cette province, ce territoire ou cet endroit est devenu une province du Canada.\", \"loi\")"
+}

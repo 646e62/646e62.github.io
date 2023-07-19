@@ -204,7 +204,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="handling-geographic-jurisdiction-via-verify_canadian_jurisdiction" class="level3">
 <h3 class="anchored" data-anchor-id="handling-geographic-jurisdiction-via-verify_canadian_jurisdiction">Handling geographic jurisdiction via <code>verify_canadian_jurisdiction()</code></h3>
 <p>The verify_canadian_jurisdiction() function checks whether the given jurisdiction string matches any Canadian provincial, territorial, or federal jurisdiction. If so, the function resolves that the offence occurred “in Canada,” thus making out general jurisdiction.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> Facts():</span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> Facts:</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    ...</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    </span>
@@ -866,133 +866,159 @@ commits an act or omission in or outside Canada that if committed in Canada woul
 <h1>Code synopsis</h1>
 <section id="constants" class="level2">
 <h2 class="anchored" data-anchor-id="constants">Constants</h2>
-<div class="cell" data-execution_count="80">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>CANADIAN_PROVINCES: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">str</span>]] <span class="op">=</span> {</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Alberta'</span>: (<span class="st">'AB'</span>, <span class="st">'Alta'</span>),</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'British Columbia'</span>: (<span class="st">'BC'</span>, <span class="st">'B.C.'</span>),</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Manitoba'</span>: (<span class="st">'MB'</span>, <span class="st">'Man.'</span>),</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'New Brunswick'</span>: (<span class="st">'NB'</span>, <span class="st">'N.B.'</span>),</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Newfoundland and Labrador'</span>: (<span class="st">'NL'</span>, <span class="st">'N.L.'</span>),</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Nova Scotia'</span>: (<span class="st">'NS'</span>, <span class="st">'N.S.'</span>),</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Ontario'</span>: (<span class="st">'ON'</span>, <span class="st">'Ont.'</span>),</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Prince Edward Island'</span>: (<span class="st">'PE'</span>, <span class="st">'P.E.I.'</span>),</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Quebec'</span>: (<span class="st">'QC'</span>, <span class="st">'Que.'</span>),</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Saskatchewan'</span>: (<span class="st">'SK'</span>, <span class="st">'Sask.'</span>)</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>CANADIAN_TERRITORIES: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">str</span>]] <span class="op">=</span> {</span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Northwest Territories'</span>: (<span class="st">'NT'</span>, <span class="st">'N.W.T.'</span>),</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Nunavut'</span>: (<span class="st">'NU'</span>, <span class="st">'Nvt.'</span>),</span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Yukon'</span>: (<span class="st">'YT'</span>, <span class="st">'Y.T.'</span>)</span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>PUBLIC_EMPLOYEE_CRITERIA <span class="op">=</span> (<span class="st">"Is the defendant a public service employee?"</span>,</span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"Does the Public Service Commission have authority to appoint the defendant?"</span>,</span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"Does any other federal statute confer authority to appoint the defendant?"</span>)</span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>OTHER_ACTS_OF_PARLIAMENT <span class="op">=</span> {</span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>COMMONWEALTH_DEMONYMS <span class="op">=</span> {</span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">"antigua and barbuda"</span>: [<span class="st">"antiguan"</span>, </span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"barbudan"</span>],</span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">"australia"</span>: [<span class="st">"australian"</span>],</span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">"the bahamas"</span>: [<span class="st">"bahamian"</span>],</span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bangladesh"</span>: [<span class="st">"bangladeshi"</span>],</span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">"barbados"</span>: [<span class="st">"barbadian"</span>, </span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"bajan"</span>],</span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>    <span class="st">"belize"</span>: [<span class="st">"belizean"</span>],</span>
-<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>    <span class="st">"botswana"</span>: [<span class="st">"botswanan"</span>],</span>
-<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>    <span class="st">"brunei darussalam"</span>: [<span class="st">"bruneian"</span>],</span>
-<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cameroon"</span>: [<span class="st">"cameroonian"</span>],</span>
-<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">"canada"</span>: [<span class="st">"canadian"</span>],</span>
-<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cyprus"</span>: [<span class="st">"cypriot"</span>],</span>
-<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dominica"</span>: [<span class="st">"dominican"</span>,</span>
-<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"dominican commonwealth"</span>],</span>
-<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a>    <span class="st">"eswatini"</span>: [<span class="st">"swazi"</span>],</span>
-<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a>    <span class="st">"fiji"</span>: [<span class="st">"fijian"</span>],</span>
-<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gambia"</span>: [<span class="st">"gambian"</span>],</span>
-<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ghana"</span>: [<span class="st">"ghanaian"</span>],</span>
-<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>    <span class="st">"grenada"</span>: [<span class="st">"grenadian"</span>],</span>
-<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>    <span class="st">"guyana"</span>: [<span class="st">"guyanese"</span>],</span>
-<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>    <span class="st">"india"</span>: [<span class="st">"indian"</span>],</span>
-<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a>    <span class="st">"jamaica"</span>: [<span class="st">"jamaican"</span>],</span>
-<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a>    <span class="st">"kenya"</span>: [<span class="st">"kenyan"</span>],</span>
-<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a>    <span class="st">"kiribati"</span>: [<span class="st">"i-kiribati"</span>],</span>
-<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lesotho"</span>: [<span class="st">"mosotho"</span>, </span>
-<span id="cb20-55"><a href="#cb20-55" aria-hidden="true" tabindex="-1"></a>                <span class="st">"basotho"</span>],</span>
-<span id="cb20-56"><a href="#cb20-56" aria-hidden="true" tabindex="-1"></a>    <span class="st">"malawi"</span>: [<span class="st">"malawian"</span>],</span>
-<span id="cb20-57"><a href="#cb20-57" aria-hidden="true" tabindex="-1"></a>    <span class="st">"malaysia"</span>: [<span class="st">"malaysian"</span>],</span>
-<span id="cb20-58"><a href="#cb20-58" aria-hidden="true" tabindex="-1"></a>    <span class="st">"maldives"</span>: [<span class="st">"maldivian"</span>],</span>
-<span id="cb20-59"><a href="#cb20-59" aria-hidden="true" tabindex="-1"></a>    <span class="st">"malta"</span>: [<span class="st">"maltese"</span>],</span>
-<span id="cb20-60"><a href="#cb20-60" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mauritius"</span>: [<span class="st">"mauritian"</span>],</span>
-<span id="cb20-61"><a href="#cb20-61" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mozambique"</span>: [<span class="st">"mozambican"</span>],</span>
-<span id="cb20-62"><a href="#cb20-62" aria-hidden="true" tabindex="-1"></a>    <span class="st">"namibia"</span>: [<span class="st">"namibian"</span>],</span>
-<span id="cb20-63"><a href="#cb20-63" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nauru"</span>: [<span class="st">"nauruan"</span>],</span>
-<span id="cb20-64"><a href="#cb20-64" aria-hidden="true" tabindex="-1"></a>    <span class="st">"new zealand"</span>: [<span class="st">"new zealander"</span>, </span>
-<span id="cb20-65"><a href="#cb20-65" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"kiwi"</span>],</span>
-<span id="cb20-66"><a href="#cb20-66" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nigeria"</span>: [<span class="st">"nigerian"</span>],</span>
-<span id="cb20-67"><a href="#cb20-67" aria-hidden="true" tabindex="-1"></a>    <span class="st">"pakistan"</span>: [<span class="st">"pakistani"</span>],</span>
-<span id="cb20-68"><a href="#cb20-68" aria-hidden="true" tabindex="-1"></a>    <span class="st">"papua new guinea"</span>: [<span class="st">"papuan"</span>, </span>
-<span id="cb20-69"><a href="#cb20-69" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"guinean"</span>],</span>
-<span id="cb20-70"><a href="#cb20-70" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rwanda"</span>: [<span class="st">"rwandan"</span>],</span>
-<span id="cb20-71"><a href="#cb20-71" aria-hidden="true" tabindex="-1"></a>    <span class="st">"saint lucia"</span>: [<span class="st">"saint lucian"</span>],</span>
-<span id="cb20-72"><a href="#cb20-72" aria-hidden="true" tabindex="-1"></a>    <span class="st">"samoa"</span>: [<span class="st">"samoan"</span>],</span>
-<span id="cb20-73"><a href="#cb20-73" aria-hidden="true" tabindex="-1"></a>    <span class="st">"seychelles"</span>: [<span class="st">"seychellois"</span>],</span>
-<span id="cb20-74"><a href="#cb20-74" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sierra leone"</span>: [<span class="st">"sierra leonean"</span>],</span>
-<span id="cb20-75"><a href="#cb20-75" aria-hidden="true" tabindex="-1"></a>    <span class="st">"singapore"</span>: [<span class="st">"singaporean"</span>],</span>
-<span id="cb20-76"><a href="#cb20-76" aria-hidden="true" tabindex="-1"></a>    <span class="st">"solomon islands"</span>: [<span class="st">"solomon islander"</span>],</span>
-<span id="cb20-77"><a href="#cb20-77" aria-hidden="true" tabindex="-1"></a>    <span class="st">"south africa"</span>: [<span class="st">"south african"</span>],</span>
-<span id="cb20-78"><a href="#cb20-78" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sri lanka"</span>: [<span class="st">"sri lankan"</span>],</span>
-<span id="cb20-79"><a href="#cb20-79" aria-hidden="true" tabindex="-1"></a>    <span class="st">"st kitts and nevis"</span>: [<span class="st">"kittitian"</span>, <span class="st">"nevisian"</span>],</span>
-<span id="cb20-80"><a href="#cb20-80" aria-hidden="true" tabindex="-1"></a>    <span class="st">"st vincent and the grenadines"</span>: [<span class="st">"vincentian"</span>],</span>
-<span id="cb20-81"><a href="#cb20-81" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tanzania"</span>: [<span class="st">"tanzanian"</span>],</span>
-<span id="cb20-82"><a href="#cb20-82" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tonga"</span>: [<span class="st">"tongan"</span>],</span>
-<span id="cb20-83"><a href="#cb20-83" aria-hidden="true" tabindex="-1"></a>    <span class="st">"trinidad and tobago"</span>: [<span class="st">"trinidadian"</span>, </span>
-<span id="cb20-84"><a href="#cb20-84" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"tobagonian"</span>],</span>
-<span id="cb20-85"><a href="#cb20-85" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tuvalu"</span>: [<span class="st">"tuvaluan"</span>],</span>
-<span id="cb20-86"><a href="#cb20-86" aria-hidden="true" tabindex="-1"></a>    <span class="st">"uganda"</span>: [<span class="st">"ugandan"</span>],</span>
-<span id="cb20-87"><a href="#cb20-87" aria-hidden="true" tabindex="-1"></a>    <span class="st">"united kingdom"</span>: [<span class="st">"british"</span>, </span>
-<span id="cb20-88"><a href="#cb20-88" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"english"</span>, </span>
-<span id="cb20-89"><a href="#cb20-89" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"scottish"</span>, </span>
-<span id="cb20-90"><a href="#cb20-90" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"welsh"</span>, </span>
-<span id="cb20-91"><a href="#cb20-91" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"northern irish"</span>],</span>
-<span id="cb20-92"><a href="#cb20-92" aria-hidden="true" tabindex="-1"></a>    <span class="st">"vanuatu"</span>: [<span class="st">"vanuatuan"</span>],</span>
-<span id="cb20-93"><a href="#cb20-93" aria-hidden="true" tabindex="-1"></a>    <span class="st">"zambia"</span>: [<span class="st">"zambian"</span>],</span>
-<span id="cb20-94"><a href="#cb20-94" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb20-95"><a href="#cb20-95" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-96"><a href="#cb20-96" aria-hidden="true" tabindex="-1"></a>NON_ESA_PARTNER_STATE_DEMONYMS <span class="op">=</span> {</span>
-<span id="cb20-97"><a href="#cb20-97" aria-hidden="true" tabindex="-1"></a>    <span class="st">"canada"</span>: (<span class="st">"canadian"</span>,),</span>
-<span id="cb20-98"><a href="#cb20-98" aria-hidden="true" tabindex="-1"></a>    <span class="st">"japan"</span>: (<span class="st">"japanese"</span>,),</span>
-<span id="cb20-99"><a href="#cb20-99" aria-hidden="true" tabindex="-1"></a>    <span class="st">"russian federation"</span>: (<span class="st">"russian"</span>,),</span>
-<span id="cb20-100"><a href="#cb20-100" aria-hidden="true" tabindex="-1"></a>    <span class="st">"united states of america"</span>: (<span class="st">"american"</span>,)</span>
-<span id="cb20-101"><a href="#cb20-101" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb20-102"><a href="#cb20-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-103"><a href="#cb20-103" aria-hidden="true" tabindex="-1"></a>ESA_PARTNER_STATE_DEMONYMS <span class="op">=</span> {</span>
-<span id="cb20-104"><a href="#cb20-104" aria-hidden="true" tabindex="-1"></a>    <span class="st">"austria"</span>: (<span class="st">"austrian"</span>,),</span>
-<span id="cb20-105"><a href="#cb20-105" aria-hidden="true" tabindex="-1"></a>    <span class="st">"belgium"</span>: (<span class="st">"belgian"</span>,),</span>
-<span id="cb20-106"><a href="#cb20-106" aria-hidden="true" tabindex="-1"></a>    <span class="st">"czech republic"</span>: (<span class="st">"czech"</span>, <span class="st">"czechoslovakian"</span>),</span>
-<span id="cb20-107"><a href="#cb20-107" aria-hidden="true" tabindex="-1"></a>    <span class="st">"denmark"</span>: (<span class="st">"danish"</span>,),</span>
-<span id="cb20-108"><a href="#cb20-108" aria-hidden="true" tabindex="-1"></a>    <span class="st">"estonia"</span>: (<span class="st">"estonian"</span>,),</span>
-<span id="cb20-109"><a href="#cb20-109" aria-hidden="true" tabindex="-1"></a>    <span class="st">"finland"</span>: (<span class="st">"finnish"</span>,),</span>
-<span id="cb20-110"><a href="#cb20-110" aria-hidden="true" tabindex="-1"></a>    <span class="st">"france"</span>: (<span class="st">"french"</span>,),</span>
-<span id="cb20-111"><a href="#cb20-111" aria-hidden="true" tabindex="-1"></a>    <span class="st">"germany"</span>: (<span class="st">"german"</span>,),</span>
-<span id="cb20-112"><a href="#cb20-112" aria-hidden="true" tabindex="-1"></a>    <span class="st">"greece"</span>: (<span class="st">"greek"</span>,),</span>
-<span id="cb20-113"><a href="#cb20-113" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hungary"</span>: (<span class="st">"hungarian"</span>,),</span>
-<span id="cb20-114"><a href="#cb20-114" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ireland"</span>: (<span class="st">"irish"</span>,),</span>
-<span id="cb20-115"><a href="#cb20-115" aria-hidden="true" tabindex="-1"></a>    <span class="st">"italy"</span>: (<span class="st">"italian"</span>,),</span>
-<span id="cb20-116"><a href="#cb20-116" aria-hidden="true" tabindex="-1"></a>    <span class="st">"luxembourg"</span>: (<span class="st">"luxembourger"</span>,),</span>
-<span id="cb20-117"><a href="#cb20-117" aria-hidden="true" tabindex="-1"></a>    <span class="st">"netherlands"</span>: (<span class="st">"dutch"</span>,),</span>
-<span id="cb20-118"><a href="#cb20-118" aria-hidden="true" tabindex="-1"></a>    <span class="st">"norway"</span>: (<span class="st">"norwegian"</span>,),</span>
-<span id="cb20-119"><a href="#cb20-119" aria-hidden="true" tabindex="-1"></a>    <span class="st">"poland"</span>: (<span class="st">"polish"</span>,),</span>
-<span id="cb20-120"><a href="#cb20-120" aria-hidden="true" tabindex="-1"></a>    <span class="st">"portugal"</span>: (<span class="st">"portuguese"</span>,),</span>
-<span id="cb20-121"><a href="#cb20-121" aria-hidden="true" tabindex="-1"></a>    <span class="st">"romania"</span>: (<span class="st">"romanian"</span>,),</span>
-<span id="cb20-122"><a href="#cb20-122" aria-hidden="true" tabindex="-1"></a>    <span class="st">"spain"</span>: (<span class="st">"spanish"</span>,),</span>
-<span id="cb20-123"><a href="#cb20-123" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sweden"</span>: (<span class="st">"swedish"</span>,),</span>
-<span id="cb20-124"><a href="#cb20-124" aria-hidden="true" tabindex="-1"></a>    <span class="st">"switzerland"</span>: (<span class="st">"swiss"</span>,),</span>
-<span id="cb20-125"><a href="#cb20-125" aria-hidden="true" tabindex="-1"></a>    <span class="st">"united kingdom"</span>: (<span class="st">"british"</span>, <span class="st">"scottish"</span>, <span class="st">"english"</span>, <span class="st">"welsh"</span>, <span class="st">"irish"</span>)</span>
-<span id="cb20-126"><a href="#cb20-126" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>HIGH_TREASON_RULES <span class="op">=</span> {</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sovereign"</span>: [(<span class="st">"Did the defendant kill the sovereign?"</span>,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"kill"</span>]),</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant attempt to kill the sovereign?"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"kill"</span>, <span class="st">"attempt"</span>]),</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant do bodily harm to the sovereign tending to cause death?"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"bodily harm"</span>, <span class="st">"tending to death"</span>]),</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant do bodily harm to the sovereign tending to cause destruction?"</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"bodily harm"</span>, <span class="st">"tending to destruction"</span>]),</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant maim the sovereign?"</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"maim"</span>]),</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant wound the sovereign?"</span>,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"wound"</span>]),</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant imprison the sovereign?"</span>,</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"imprison"</span>]),</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>                  (<span class="st">"Did the defendant restrain the sovereign?"</span>,</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>                   [<span class="st">"restrain"</span>])],</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"canada"</span>: [(<span class="st">"Did the defendant levy war against Canada?"</span>,</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>                [<span class="st">"levy war"</span>]),</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>               (<span class="st">"Did the defendant prepare to levy war against Canada?"</span>,</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>                [<span class="st">"prepare"</span>, <span class="st">"levy war"</span>]),</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>               (<span class="st">"Did the defendant assist an enemy at war with Canada?"</span>,</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>                [<span class="st">"assist warring enemy"</span>]),</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>               (<span class="st">"Did the defendant assist an armed force hostily engaged with Canadian Forces?"</span>,</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>                [<span class="st">"assist hostile force"</span>])]}</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>CANADIAN_PROVINCES: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">str</span>]] <span class="op">=</span> {</span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Alberta'</span>: (<span class="st">'AB'</span>, <span class="st">'Alta'</span>),</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">'British Columbia'</span>: (<span class="st">'BC'</span>, <span class="st">'B.C.'</span>),</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Manitoba'</span>: (<span class="st">'MB'</span>, <span class="st">'Man.'</span>),</span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">'New Brunswick'</span>: (<span class="st">'NB'</span>, <span class="st">'N.B.'</span>),</span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Newfoundland and Labrador'</span>: (<span class="st">'NL'</span>, <span class="st">'N.L.'</span>),</span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Nova Scotia'</span>: (<span class="st">'NS'</span>, <span class="st">'N.S.'</span>),</span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Ontario'</span>: (<span class="st">'ON'</span>, <span class="st">'Ont.'</span>),</span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Prince Edward Island'</span>: (<span class="st">'PE'</span>, <span class="st">'P.E.I.'</span>),</span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Quebec'</span>: (<span class="st">'QC'</span>, <span class="st">'Que.'</span>),</span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Saskatchewan'</span>: (<span class="st">'SK'</span>, <span class="st">'Sask.'</span>)</span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>CANADIAN_TERRITORIES: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">str</span>]] <span class="op">=</span> {</span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Northwest Territories'</span>: (<span class="st">'NT'</span>, <span class="st">'N.W.T.'</span>),</span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Nunavut'</span>: (<span class="st">'NU'</span>, <span class="st">'Nvt.'</span>),</span>
+<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Yukon'</span>: (<span class="st">'YT'</span>, <span class="st">'Y.T.'</span>)</span>
+<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>PUBLIC_EMPLOYEE_CRITERIA <span class="op">=</span> (<span class="st">"Is the defendant a public service employee?"</span>,</span>
+<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"Does the Public Service Commission have authority to appoint the defendant?"</span>,</span>
+<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"Does any other federal statute confer authority to appoint the defendant?"</span>)</span>
+<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>OTHER_ACTS_OF_PARLIAMENT <span class="op">=</span> {</span>
+<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a>COMMONWEALTH_DEMONYMS <span class="op">=</span> {</span>
+<span id="cb20-55"><a href="#cb20-55" aria-hidden="true" tabindex="-1"></a>    <span class="st">"antigua and barbuda"</span>: [<span class="st">"antiguan"</span>, </span>
+<span id="cb20-56"><a href="#cb20-56" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"barbudan"</span>],</span>
+<span id="cb20-57"><a href="#cb20-57" aria-hidden="true" tabindex="-1"></a>    <span class="st">"australia"</span>: [<span class="st">"australian"</span>],</span>
+<span id="cb20-58"><a href="#cb20-58" aria-hidden="true" tabindex="-1"></a>    <span class="st">"the bahamas"</span>: [<span class="st">"bahamian"</span>],</span>
+<span id="cb20-59"><a href="#cb20-59" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bangladesh"</span>: [<span class="st">"bangladeshi"</span>],</span>
+<span id="cb20-60"><a href="#cb20-60" aria-hidden="true" tabindex="-1"></a>    <span class="st">"barbados"</span>: [<span class="st">"barbadian"</span>, </span>
+<span id="cb20-61"><a href="#cb20-61" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"bajan"</span>],</span>
+<span id="cb20-62"><a href="#cb20-62" aria-hidden="true" tabindex="-1"></a>    <span class="st">"belize"</span>: [<span class="st">"belizean"</span>],</span>
+<span id="cb20-63"><a href="#cb20-63" aria-hidden="true" tabindex="-1"></a>    <span class="st">"botswana"</span>: [<span class="st">"botswanan"</span>],</span>
+<span id="cb20-64"><a href="#cb20-64" aria-hidden="true" tabindex="-1"></a>    <span class="st">"brunei darussalam"</span>: [<span class="st">"bruneian"</span>],</span>
+<span id="cb20-65"><a href="#cb20-65" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cameroon"</span>: [<span class="st">"cameroonian"</span>],</span>
+<span id="cb20-66"><a href="#cb20-66" aria-hidden="true" tabindex="-1"></a>    <span class="st">"canada"</span>: [<span class="st">"canadian"</span>],</span>
+<span id="cb20-67"><a href="#cb20-67" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cyprus"</span>: [<span class="st">"cypriot"</span>],</span>
+<span id="cb20-68"><a href="#cb20-68" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dominica"</span>: [<span class="st">"dominican"</span>,</span>
+<span id="cb20-69"><a href="#cb20-69" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"dominican commonwealth"</span>],</span>
+<span id="cb20-70"><a href="#cb20-70" aria-hidden="true" tabindex="-1"></a>    <span class="st">"eswatini"</span>: [<span class="st">"swazi"</span>],</span>
+<span id="cb20-71"><a href="#cb20-71" aria-hidden="true" tabindex="-1"></a>    <span class="st">"fiji"</span>: [<span class="st">"fijian"</span>],</span>
+<span id="cb20-72"><a href="#cb20-72" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gambia"</span>: [<span class="st">"gambian"</span>],</span>
+<span id="cb20-73"><a href="#cb20-73" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ghana"</span>: [<span class="st">"ghanaian"</span>],</span>
+<span id="cb20-74"><a href="#cb20-74" aria-hidden="true" tabindex="-1"></a>    <span class="st">"grenada"</span>: [<span class="st">"grenadian"</span>],</span>
+<span id="cb20-75"><a href="#cb20-75" aria-hidden="true" tabindex="-1"></a>    <span class="st">"guyana"</span>: [<span class="st">"guyanese"</span>],</span>
+<span id="cb20-76"><a href="#cb20-76" aria-hidden="true" tabindex="-1"></a>    <span class="st">"india"</span>: [<span class="st">"indian"</span>],</span>
+<span id="cb20-77"><a href="#cb20-77" aria-hidden="true" tabindex="-1"></a>    <span class="st">"jamaica"</span>: [<span class="st">"jamaican"</span>],</span>
+<span id="cb20-78"><a href="#cb20-78" aria-hidden="true" tabindex="-1"></a>    <span class="st">"kenya"</span>: [<span class="st">"kenyan"</span>],</span>
+<span id="cb20-79"><a href="#cb20-79" aria-hidden="true" tabindex="-1"></a>    <span class="st">"kiribati"</span>: [<span class="st">"i-kiribati"</span>],</span>
+<span id="cb20-80"><a href="#cb20-80" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lesotho"</span>: [<span class="st">"mosotho"</span>, </span>
+<span id="cb20-81"><a href="#cb20-81" aria-hidden="true" tabindex="-1"></a>                <span class="st">"basotho"</span>],</span>
+<span id="cb20-82"><a href="#cb20-82" aria-hidden="true" tabindex="-1"></a>    <span class="st">"malawi"</span>: [<span class="st">"malawian"</span>],</span>
+<span id="cb20-83"><a href="#cb20-83" aria-hidden="true" tabindex="-1"></a>    <span class="st">"malaysia"</span>: [<span class="st">"malaysian"</span>],</span>
+<span id="cb20-84"><a href="#cb20-84" aria-hidden="true" tabindex="-1"></a>    <span class="st">"maldives"</span>: [<span class="st">"maldivian"</span>],</span>
+<span id="cb20-85"><a href="#cb20-85" aria-hidden="true" tabindex="-1"></a>    <span class="st">"malta"</span>: [<span class="st">"maltese"</span>],</span>
+<span id="cb20-86"><a href="#cb20-86" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mauritius"</span>: [<span class="st">"mauritian"</span>],</span>
+<span id="cb20-87"><a href="#cb20-87" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mozambique"</span>: [<span class="st">"mozambican"</span>],</span>
+<span id="cb20-88"><a href="#cb20-88" aria-hidden="true" tabindex="-1"></a>    <span class="st">"namibia"</span>: [<span class="st">"namibian"</span>],</span>
+<span id="cb20-89"><a href="#cb20-89" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nauru"</span>: [<span class="st">"nauruan"</span>],</span>
+<span id="cb20-90"><a href="#cb20-90" aria-hidden="true" tabindex="-1"></a>    <span class="st">"new zealand"</span>: [<span class="st">"new zealander"</span>, </span>
+<span id="cb20-91"><a href="#cb20-91" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"kiwi"</span>],</span>
+<span id="cb20-92"><a href="#cb20-92" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nigeria"</span>: [<span class="st">"nigerian"</span>],</span>
+<span id="cb20-93"><a href="#cb20-93" aria-hidden="true" tabindex="-1"></a>    <span class="st">"pakistan"</span>: [<span class="st">"pakistani"</span>],</span>
+<span id="cb20-94"><a href="#cb20-94" aria-hidden="true" tabindex="-1"></a>    <span class="st">"papua new guinea"</span>: [<span class="st">"papuan"</span>, </span>
+<span id="cb20-95"><a href="#cb20-95" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"guinean"</span>],</span>
+<span id="cb20-96"><a href="#cb20-96" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rwanda"</span>: [<span class="st">"rwandan"</span>],</span>
+<span id="cb20-97"><a href="#cb20-97" aria-hidden="true" tabindex="-1"></a>    <span class="st">"saint lucia"</span>: [<span class="st">"saint lucian"</span>],</span>
+<span id="cb20-98"><a href="#cb20-98" aria-hidden="true" tabindex="-1"></a>    <span class="st">"samoa"</span>: [<span class="st">"samoan"</span>],</span>
+<span id="cb20-99"><a href="#cb20-99" aria-hidden="true" tabindex="-1"></a>    <span class="st">"seychelles"</span>: [<span class="st">"seychellois"</span>],</span>
+<span id="cb20-100"><a href="#cb20-100" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sierra leone"</span>: [<span class="st">"sierra leonean"</span>],</span>
+<span id="cb20-101"><a href="#cb20-101" aria-hidden="true" tabindex="-1"></a>    <span class="st">"singapore"</span>: [<span class="st">"singaporean"</span>],</span>
+<span id="cb20-102"><a href="#cb20-102" aria-hidden="true" tabindex="-1"></a>    <span class="st">"solomon islands"</span>: [<span class="st">"solomon islander"</span>],</span>
+<span id="cb20-103"><a href="#cb20-103" aria-hidden="true" tabindex="-1"></a>    <span class="st">"south africa"</span>: [<span class="st">"south african"</span>],</span>
+<span id="cb20-104"><a href="#cb20-104" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sri lanka"</span>: [<span class="st">"sri lankan"</span>],</span>
+<span id="cb20-105"><a href="#cb20-105" aria-hidden="true" tabindex="-1"></a>    <span class="st">"st kitts and nevis"</span>: [<span class="st">"kittitian"</span>, <span class="st">"nevisian"</span>],</span>
+<span id="cb20-106"><a href="#cb20-106" aria-hidden="true" tabindex="-1"></a>    <span class="st">"st vincent and the grenadines"</span>: [<span class="st">"vincentian"</span>],</span>
+<span id="cb20-107"><a href="#cb20-107" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tanzania"</span>: [<span class="st">"tanzanian"</span>],</span>
+<span id="cb20-108"><a href="#cb20-108" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tonga"</span>: [<span class="st">"tongan"</span>],</span>
+<span id="cb20-109"><a href="#cb20-109" aria-hidden="true" tabindex="-1"></a>    <span class="st">"trinidad and tobago"</span>: [<span class="st">"trinidadian"</span>, </span>
+<span id="cb20-110"><a href="#cb20-110" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"tobagonian"</span>],</span>
+<span id="cb20-111"><a href="#cb20-111" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tuvalu"</span>: [<span class="st">"tuvaluan"</span>],</span>
+<span id="cb20-112"><a href="#cb20-112" aria-hidden="true" tabindex="-1"></a>    <span class="st">"uganda"</span>: [<span class="st">"ugandan"</span>],</span>
+<span id="cb20-113"><a href="#cb20-113" aria-hidden="true" tabindex="-1"></a>    <span class="st">"united kingdom"</span>: [<span class="st">"british"</span>, </span>
+<span id="cb20-114"><a href="#cb20-114" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"english"</span>, </span>
+<span id="cb20-115"><a href="#cb20-115" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"scottish"</span>, </span>
+<span id="cb20-116"><a href="#cb20-116" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"welsh"</span>, </span>
+<span id="cb20-117"><a href="#cb20-117" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"northern irish"</span>],</span>
+<span id="cb20-118"><a href="#cb20-118" aria-hidden="true" tabindex="-1"></a>    <span class="st">"vanuatu"</span>: [<span class="st">"vanuatuan"</span>],</span>
+<span id="cb20-119"><a href="#cb20-119" aria-hidden="true" tabindex="-1"></a>    <span class="st">"zambia"</span>: [<span class="st">"zambian"</span>],</span>
+<span id="cb20-120"><a href="#cb20-120" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-121"><a href="#cb20-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-122"><a href="#cb20-122" aria-hidden="true" tabindex="-1"></a>NON_ESA_PARTNER_STATE_DEMONYMS <span class="op">=</span> {</span>
+<span id="cb20-123"><a href="#cb20-123" aria-hidden="true" tabindex="-1"></a>    <span class="st">"canada"</span>: (<span class="st">"canadian"</span>,),</span>
+<span id="cb20-124"><a href="#cb20-124" aria-hidden="true" tabindex="-1"></a>    <span class="st">"japan"</span>: (<span class="st">"japanese"</span>,),</span>
+<span id="cb20-125"><a href="#cb20-125" aria-hidden="true" tabindex="-1"></a>    <span class="st">"russian federation"</span>: (<span class="st">"russian"</span>,),</span>
+<span id="cb20-126"><a href="#cb20-126" aria-hidden="true" tabindex="-1"></a>    <span class="st">"united states of america"</span>: (<span class="st">"american"</span>,)</span>
+<span id="cb20-127"><a href="#cb20-127" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-128"><a href="#cb20-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-129"><a href="#cb20-129" aria-hidden="true" tabindex="-1"></a>ESA_PARTNER_STATE_DEMONYMS <span class="op">=</span> {</span>
+<span id="cb20-130"><a href="#cb20-130" aria-hidden="true" tabindex="-1"></a>    <span class="st">"austria"</span>: (<span class="st">"austrian"</span>,),</span>
+<span id="cb20-131"><a href="#cb20-131" aria-hidden="true" tabindex="-1"></a>    <span class="st">"belgium"</span>: (<span class="st">"belgian"</span>,),</span>
+<span id="cb20-132"><a href="#cb20-132" aria-hidden="true" tabindex="-1"></a>    <span class="st">"czech republic"</span>: (<span class="st">"czech"</span>, <span class="st">"czechoslovakian"</span>),</span>
+<span id="cb20-133"><a href="#cb20-133" aria-hidden="true" tabindex="-1"></a>    <span class="st">"denmark"</span>: (<span class="st">"danish"</span>,),</span>
+<span id="cb20-134"><a href="#cb20-134" aria-hidden="true" tabindex="-1"></a>    <span class="st">"estonia"</span>: (<span class="st">"estonian"</span>,),</span>
+<span id="cb20-135"><a href="#cb20-135" aria-hidden="true" tabindex="-1"></a>    <span class="st">"finland"</span>: (<span class="st">"finnish"</span>,),</span>
+<span id="cb20-136"><a href="#cb20-136" aria-hidden="true" tabindex="-1"></a>    <span class="st">"france"</span>: (<span class="st">"french"</span>,),</span>
+<span id="cb20-137"><a href="#cb20-137" aria-hidden="true" tabindex="-1"></a>    <span class="st">"germany"</span>: (<span class="st">"german"</span>,),</span>
+<span id="cb20-138"><a href="#cb20-138" aria-hidden="true" tabindex="-1"></a>    <span class="st">"greece"</span>: (<span class="st">"greek"</span>,),</span>
+<span id="cb20-139"><a href="#cb20-139" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hungary"</span>: (<span class="st">"hungarian"</span>,),</span>
+<span id="cb20-140"><a href="#cb20-140" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ireland"</span>: (<span class="st">"irish"</span>,),</span>
+<span id="cb20-141"><a href="#cb20-141" aria-hidden="true" tabindex="-1"></a>    <span class="st">"italy"</span>: (<span class="st">"italian"</span>,),</span>
+<span id="cb20-142"><a href="#cb20-142" aria-hidden="true" tabindex="-1"></a>    <span class="st">"luxembourg"</span>: (<span class="st">"luxembourger"</span>,),</span>
+<span id="cb20-143"><a href="#cb20-143" aria-hidden="true" tabindex="-1"></a>    <span class="st">"netherlands"</span>: (<span class="st">"dutch"</span>,),</span>
+<span id="cb20-144"><a href="#cb20-144" aria-hidden="true" tabindex="-1"></a>    <span class="st">"norway"</span>: (<span class="st">"norwegian"</span>,),</span>
+<span id="cb20-145"><a href="#cb20-145" aria-hidden="true" tabindex="-1"></a>    <span class="st">"poland"</span>: (<span class="st">"polish"</span>,),</span>
+<span id="cb20-146"><a href="#cb20-146" aria-hidden="true" tabindex="-1"></a>    <span class="st">"portugal"</span>: (<span class="st">"portuguese"</span>,),</span>
+<span id="cb20-147"><a href="#cb20-147" aria-hidden="true" tabindex="-1"></a>    <span class="st">"romania"</span>: (<span class="st">"romanian"</span>,),</span>
+<span id="cb20-148"><a href="#cb20-148" aria-hidden="true" tabindex="-1"></a>    <span class="st">"spain"</span>: (<span class="st">"spanish"</span>,),</span>
+<span id="cb20-149"><a href="#cb20-149" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sweden"</span>: (<span class="st">"swedish"</span>,),</span>
+<span id="cb20-150"><a href="#cb20-150" aria-hidden="true" tabindex="-1"></a>    <span class="st">"switzerland"</span>: (<span class="st">"swiss"</span>,),</span>
+<span id="cb20-151"><a href="#cb20-151" aria-hidden="true" tabindex="-1"></a>    <span class="st">"united kingdom"</span>: (<span class="st">"british"</span>, <span class="st">"scottish"</span>, <span class="st">"english"</span>, <span class="st">"welsh"</span>, <span class="st">"irish"</span>)</span>
+<span id="cb20-152"><a href="#cb20-152" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="utility-functions" class="level2">
@@ -1362,35 +1388,54 @@ commits an act or omission in or outside Canada that if committed in Canada woul
 <section id="updated-main.py-functions" class="level2">
 <h2 class="anchored" data-anchor-id="updated-main.py-functions">Updated main.py functions</h2>
 <div class="cell" data-tags="[]" data-execution_count="44">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> verify_high_treason(matches, facts, defendant):</span>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> high_treason_rules(facts):</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Determines whether the factual and legal matrix is sufficient to make out </span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co">    high treason.</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    reasons <span class="op">=</span> []</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> matches:</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        reasons.append(<span class="st">"* No wrongful act"</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Checks if the facts of the case make out the offence of high treason.</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    matches <span class="op">=</span> []  <span class="co"># create an empty list to hold matches</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check if any of the actions in the facts are in the list of high treason actions</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> action <span class="kw">in</span> facts.actions:</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        complainant_key <span class="op">=</span> action[<span class="dv">0</span>] </span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        action_value <span class="op">=</span> action[<span class="dv">1</span>]</span>
 <span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check allegiance</span></span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> defendant.allegiance_test():</span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>        reasons.append(<span class="st">"* Defendant does not owe allegiance to the sovereign"</span>)</span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If defendant doesn't owe allegiance, then we also check for jurisdiction</span></span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> defendant.allegiance_test() <span class="kw">and</span> facts.jurisdiction <span class="op">==</span> <span class="st">"not recognized"</span>:</span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>        reasons.append(<span class="st">"* No jurisdiction"</span>)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> complainant_key <span class="kw">in</span> HIGH_TREASON_RULES: <span class="co"># Checks to see if the complainant category lines up with one of the two in HIGH_TREASON RULES</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>            tuple_list <span class="op">=</span> HIGH_TREASON_RULES[complainant_key]</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> item <span class="kw">in</span> tuple_list:</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> action_value <span class="op">==</span> item[<span class="dv">1</span>]:</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>                    matches.append(item)  <span class="co"># append the matching item to the list</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> matches  <span class="co"># return the list of matches</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If there are any reasons in the list, print them out. </span></span>
-<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Otherwise, high treason has been committed.</span></span>
-<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> reasons:</span>
-<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"High treason not committed:"</span>)</span>
-<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> reason <span class="kw">in</span> reasons:</span>
-<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(reason)</span>
-<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"High treason committed. Matches:"</span>)</span>
-<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> match <span class="kw">in</span> matches:</span>
-<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(match)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> verify_high_treason(matches, facts, defendant):</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="co">    Determines whether the factual and legal matrix is sufficient to make out </span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a><span class="co">    high treason.</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>    reasons <span class="op">=</span> []</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> matches:</span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>        reasons.append(<span class="st">"* No wrongful act"</span>)</span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check allegiance</span></span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> defendant.allegiance_test():</span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a>        reasons.append(<span class="st">"* Defendant does not owe allegiance to the sovereign"</span>)</span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If defendant doesn't owe allegiance, then we also check for jurisdiction</span></span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> defendant.allegiance_test() <span class="kw">and</span> facts.jurisdiction <span class="op">==</span> <span class="st">"not recognized"</span>:</span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a>        reasons.append(<span class="st">"* No jurisdiction"</span>)</span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If there are any reasons in the list, print them out. </span></span>
+<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Otherwise, high treason has been committed.</span></span>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> reasons:</span>
+<span id="cb24-42"><a href="#cb24-42" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"High treason not committed:"</span>)</span>
+<span id="cb24-43"><a href="#cb24-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> reason <span class="kw">in</span> reasons:</span>
+<span id="cb24-44"><a href="#cb24-44" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(reason)</span>
+<span id="cb24-45"><a href="#cb24-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb24-46"><a href="#cb24-46" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"High treason committed. Matches:"</span>)</span>
+<span id="cb24-47"><a href="#cb24-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> match <span class="kw">in</span> matches:</span>
+<span id="cb24-48"><a href="#cb24-48" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(match)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>

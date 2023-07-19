@@ -690,6 +690,511 @@ In the first post, I cited high treason's limited case law base as a reason for 
 [^facts_jurisdiction]: As the system develops, jurisdiction may become a more significant issue. If that proves to be the case, jurisdictional functions will likely have to move to a separate class. For now, treating them as just another fact makes sense.
 [^offence_jurisdiction]: See note 1 above. The same logic applies to stray functions that deal with individual offences. How I should best deal with these is still very much to be determined.
 
+# Complete code
+
+## Constants
+
+```{python}
+CANADIAN_PROVINCES: dict[str, tuple[str, str]] = {
+    'Alberta': ('AB', 'Alta'),
+    'British Columbia': ('BC', 'B.C.'),
+    'Manitoba': ('MB', 'Man.'),
+    'New Brunswick': ('NB', 'N.B.'),
+    'Newfoundland and Labrador': ('NL', 'N.L.'),
+    'Nova Scotia': ('NS', 'N.S.'),
+    'Ontario': ('ON', 'Ont.'),
+    'Prince Edward Island': ('PE', 'P.E.I.'),
+    'Quebec': ('QC', 'Que.'),
+    'Saskatchewan': ('SK', 'Sask.')
+}
+
+CANADIAN_TERRITORIES: dict[str, tuple[str, str]] = {
+    'Northwest Territories': ('NT', 'N.W.T.'),
+    'Nunavut': ('NU', 'Nvt.'),
+    'Yukon': ('YT', 'Y.T.')
+}
+
+PUBLIC_EMPLOYEE_CRITERIA = ("Is the defendant a public service employee?",
+                            "Does the Public Service Commission have authority to appoint the defendant?",
+                            "Does any other federal statute confer authority to appoint the defendant?")
+
+OTHER_ACTS_OF_PARLIAMENT = {
+    
+}
+
+COMMONWEALTH_DEMONYMS = {
+    "antigua and barbuda": ["antiguan", 
+                            "barbudan"],
+    "australia": ["australian"],
+    "the bahamas": ["bahamian"],
+    "bangladesh": ["bangladeshi"],
+    "barbados": ["barbadian", 
+                 "bajan"],
+    "belize": ["belizean"],
+    "botswana": ["botswanan"],
+    "brunei darussalam": ["bruneian"],
+    "cameroon": ["cameroonian"],
+    "canada": ["canadian"],
+    "cyprus": ["cypriot"],
+    "dominica": ["dominican",
+                 "dominican commonwealth"],
+    "eswatini": ["swazi"],
+    "fiji": ["fijian"],
+    "gambia": ["gambian"],
+    "ghana": ["ghanaian"],
+    "grenada": ["grenadian"],
+    "guyana": ["guyanese"],
+    "india": ["indian"],
+    "jamaica": ["jamaican"],
+    "kenya": ["kenyan"],
+    "kiribati": ["i-kiribati"],
+    "lesotho": ["mosotho", 
+                "basotho"],
+    "malawi": ["malawian"],
+    "malaysia": ["malaysian"],
+    "maldives": ["maldivian"],
+    "malta": ["maltese"],
+    "mauritius": ["mauritian"],
+    "mozambique": ["mozambican"],
+    "namibia": ["namibian"],
+    "nauru": ["nauruan"],
+    "new zealand": ["new zealander", 
+                    "kiwi"],
+    "nigeria": ["nigerian"],
+    "pakistan": ["pakistani"],
+    "papua new guinea": ["papuan", 
+                         "guinean"],
+    "rwanda": ["rwandan"],
+    "saint lucia": ["saint lucian"],
+    "samoa": ["samoan"],
+    "seychelles": ["seychellois"],
+    "sierra leone": ["sierra leonean"],
+    "singapore": ["singaporean"],
+    "solomon islands": ["solomon islander"],
+    "south africa": ["south african"],
+    "sri lanka": ["sri lankan"],
+    "st kitts and nevis": ["kittitian", "nevisian"],
+    "st vincent and the grenadines": ["vincentian"],
+    "tanzania": ["tanzanian"],
+    "tonga": ["tongan"],
+    "trinidad and tobago": ["trinidadian", 
+                            "tobagonian"],
+    "tuvalu": ["tuvaluan"],
+    "uganda": ["ugandan"],
+    "united kingdom": ["british", 
+                       "english", 
+                       "scottish", 
+                       "welsh", 
+                       "northern irish"],
+    "vanuatu": ["vanuatuan"],
+    "zambia": ["zambian"],
+}
+
+NON_ESA_PARTNER_STATE_DEMONYMS = {
+    "canada": ("canadian",),
+    "japan": ("japanese",),
+    "russian federation": ("russian",),
+    "united states of america": ("american",)
+}
+
+ESA_PARTNER_STATE_DEMONYMS = {
+    "austria": ("austrian",),
+    "belgium": ("belgian",),
+    "czech republic": ("czech", "czechoslovakian"),
+    "denmark": ("danish",),
+    "estonia": ("estonian",),
+    "finland": ("finnish",),
+    "france": ("french",),
+    "germany": ("german",),
+    "greece": ("greek",),
+    "hungary": ("hungarian",),
+    "ireland": ("irish",),
+    "italy": ("italian",),
+    "luxembourg": ("luxembourger",),
+    "netherlands": ("dutch",),
+    "norway": ("norwegian",),
+    "poland": ("polish",),
+    "portugal": ("portuguese",),
+    "romania": ("romanian",),
+    "spain": ("spanish",),
+    "sweden": ("swedish",),
+    "switzerland": ("swiss",),
+    "united kingdom": ("british", "scottish", "english", "welsh", "irish")
+}
+```
+
+## Models
+
+```{python}
+from typing import Optional
+
+class Facts:
+    """
+    A basic class capable of handling the minimum facts required for a high 
+    treason offence.
+
+    Attributes:
+        victim_category (str): The name of the victim of the offence.
+        offence_date (str): The date of the offence.
+        jurisdiction (str): The jurisdiction in which the offence took place.
+        actions (list): A list of actions that the defendant took against the 
+            victim.
+        role (list): A list of roles that the defendant played in the offence.
+
+    A Facts object should account for one offence and offender. Any potential
+    path to a conviction should be represented by a distinct Facts object. 
+    Multiple offences or offenders should be represented by multiple Facts 
+    objects.
+    """
+
+    def __init__(self, 
+                 victim_category: str = None, 
+                 offence_date: str = None, 
+                 jurisdiction: str = None, 
+                 actions: list = None, 
+                 role: list = None,
+                 defendant: 'Defendant' = None
+                ):
+        self.victim_category = victim_category
+        self.offence_date = offence_date
+        self.jurisdiction = jurisdiction if jurisdiction is not None else []
+        self.actions = actions if actions is not None else []
+        self.role = role if role is not None else []
+        self.defendant = defendant
+
+        
+    def create_facts(self):
+        """
+        Interactively collects details about the offence and stores them as 
+        instance attributes.
+
+        This method asks the user for details about the victim, offence date, 
+        jurisdiction, and actions related to the offence. 
+        These details are then stored as instance attributes for future use.
+        
+        Note:
+            This method uses the `input` function and thus is intended for use 
+            in an interactive context.
+        """
+        
+        print("Please enter the facts of the case:")
+
+        victim_category = input("Who is the victim? ")
+        victim_category = standardize_sovereign_names(victim_category)
+        victim_category = standardize_canada_names(victim_category)
+        complainant = Complainant(victim_category)
+        offence_date = input("Date of the offence (YYYY-MM-DD): ")
+        jurisdiction = input("Jurisdiction: ")
+        actions = high_treason_facts(victim_category)
+
+        self.victim_category = complainant.name
+        self.offence_date = offence_date
+        self.actions = actions
+        self.jurisdiction = jurisdiction
+
+        
+    def verify_jurisdiction(self):
+        """
+        Runs a broad analysis to determine whether Canadian jurisdiction exists
+        or can be construed through the circumstances.
+        """
+        
+        if self.verify_canadian_jurisdiction(self.jurisdiction):
+            self.jurisdiction = jurisdiction
+        elif self.verify_constructive_jurisdiction_aircraft():
+            self.jurisdiction = jurisdiction
+        elif self.verify_constructive_jurisdiction_space():
+            self.jurisdiction = jurisdiction
+        else:
+            return False
+
+            
+    def verify_canadian_jurisdiction(self,
+                                     jurisdiction: list, 
+                                     provinces: dict[str, tuple[str, str]] = CANADIAN_PROVINCES, 
+                                     territories: dict[str, tuple[str, str]] = CANADIAN_TERRITORIES) -> tuple[bool, Optional[str]]:
+        """
+        This function checks if a given jurisdiction is recognized as part of Canada.
+
+        The function accepts a string representing a jurisdiction and two 
+        optional dictionaries representing provinces and territories. Each 
+        dictionary maps a region's name to a tuple consisting of its 
+        abbreviation and French translation. The function checks if the 
+        jurisdiction matches the name, abbreviation, or French translation of 
+        any of the provinces or territories. The function also checks if the 
+        jurisdiction is "canada" or its abbreviation "ca".
+
+        If a match is found, the function returns True; otherwise, it returns 
+        False.
+
+        Args:
+            jurisdiction (str): The jurisdiction to check.
+            provinces (dict[str, tuple[str, str]], optional): A dictionary of 
+            Canadian provinces. Defaults to CANADIAN_PROVINCES.
+            territories (dict[str, tuple[str, str]], optional): A dictionary of
+            Canadian territories. Defaults to CANADIAN_TERRITORIES.
+
+        Returns:
+            tuple[bool, Optional[str]]: A tuple where the first element is a 
+            boolean indicating if the jurisdiction is recognized, and the 
+            second element is an optional string message.
+        """
+        
+        for item in jurisdiction:
+            if item.lower() in ('canada', 'ca'):
+                return True
+
+            for region in [provinces, territories]:
+                for key, value in region.items():
+                    if item.lower() in [key.lower(), value[0].lower(), value[1].lower()]:
+                        return True
+            return False
+
+    
+    def verify_constructive_jurisdiction_aircraft(self):
+        """
+        Verifies whether an offence committed on an aircraft falls under 
+        Canadian jurisdiction and updates the jurisdiction attribute 
+        accordingly.
+
+        This method asks the user a series of questions to determine if the 
+        offence, when committed on an aircraft, falls under the Canadian 
+        statute. If it does, the jurisdiction is updated to include the 
+        specific location.
+
+        Note:
+            This method uses the `input` function and thus is intended for use 
+            in an interactive context.
+        """
+        
+        deemed_jurisdiction = []
+
+        offense_committed = verify_yes_no("Was the offense committed on an aircraft in flight? (yes/no): ")
+        aircraft_registered = aircraft_leased = qualified_operator = flight_terminated = False
+
+        if offense_committed:
+            flight_terminated = verify_yes_no("Did the flight terminate in Canada? (yes/no): ")
+            aircraft_registered = verify_yes_no("Is the aircraft\n * Registered in Canada under regulations made under the Aeronautics Act? (yes/no): ")
+            aircraft_leased = verify_yes_no(" * Leased without crew operated by a person who is qualified under regulations made under the Aeronautics Act to be registered as owner of an aircraft registered in Canada under those regulations? (yes/no): ")
+        if aircraft_leased:
+            qualified_operator = verify_yes_no(" * Operated by a person who is qualified under regulations made under the Aeronautics Act to be registered as owner of an aircraft registered in Canada under those regulations? (yes/no): ")
+            
+
+        if aircraft_registered:
+            deemed_jurisdiction.append("deemed jurisdiction (legally registered aircraft)")
+        if aircraft_leased and qualified_operator:
+            deemed_jurisdiction.append("deemed jurisdiction (legally leased and operated aircraft)")
+        if flight_terminated:
+            deemed_jurisdiction.append("deemed jurisdiction (flight terminated in Canada)")
+
+        for item in deemed_jurisdiction:
+            if item not in self.jurisdiction:
+                self.jurisdiction.append(item)
+ 
+
+    def verify_constructive_jurisdiction_space(self):
+        # List of possible locations
+        locations = ["on the iss", 
+                     "en route to iss", 
+                     "on the lunar gateway", 
+                     "en route to/from Lunar Gateway", 
+                     "on the lunar surface"]
+
+        # Combine all offences into one list
+        all_offences = ["threatend a canadian crew member's life", 
+                        "threatend a canadian crew member's security", 
+                        "damaged a canadian flight element", 
+                        "offended in relation to a canadian flight element",
+                        "damaged a canadian flight element"]
+
+        partner_state_member = self._verify_partner_state(self.defendant.agency)
+        
+        if partner_state_member:
+            for offence in all_offences:
+                print(f"The defendant {offence} — (yes/no): ")
+                offence_committed = input().lower()
+                if offence_committed == 'yes':
+                    for location in locations:
+                        print(f"Did the offence take place {location}? (yes/no): ")
+                        offence_location = input().lower()
+                        if offence_location == 'yes':
+                            self.jurisdiction.append(f"deemed jurisdiction ({offence} {location})")
+
+
+    def _verify_partner_state(self, memberships):
+        """
+        This is a private method that checks if any given citizenship belongs to a 
+        Partner State country.
+
+        Args:
+            citizenships (list): The list of citizenships to check. Each should be a 
+            lowercase string that denotes a country or its demonym.
+
+        Returns:
+            bool: True if any of the citizenships is in the list of Partner States' countries 
+            or demonyms, False otherwise.
+        """
+
+        # Convert the dictionary values (which are tuples) into sets for easy searching
+        non_esa_demonyms = set(val for sublist in NON_ESA_PARTNER_STATE_DEMONYMS.values() for val in sublist)
+        esa_demonyms = set(val for sublist in ESA_PARTNER_STATE_DEMONYMS.values() for val in sublist)
+
+        for membership in memberships:
+            if membership in non_esa_demonyms or membership in esa_demonyms:
+                return True
+
+        return False
+
+class Defendant:
+    """
+    Creates a defendant instance. Necessary to the extent that some offences 
+    only apply to defendants with certain characteristics, and to the extent
+    that some offences will involve multiple defendants who need to be kept
+    distinct from one another.
+    """
+    
+    def __init__(self, 
+                 name=None, 
+                 age=None, 
+                 liability=None, 
+                 criminal_record=None,
+                 vocation=None,
+                 citizenship=None,
+                 agency=None):
+        
+        self.name = name
+        self.age = age
+        self.liability = liability
+        self.criminal_record = criminal_record
+        self.vocation = vocation if vocation is not None else []
+        self.citizenship = citizenship if citizenship is not None else []
+        self.agency = agency if agency is not None else []
+
+    def public_employee_test(self):
+        """
+        Verifies whether a defendant is a public employee as understood by the 
+        Criminal Code.
+        """
+        
+        for question in PUBLIC_EMPLOYEE_CRITERIA:
+            response = input(question + " (yes/no): ")
+            if response.strip().lower() != 'yes':
+                return
+        self.vocation.append("public employee")
+
+    def allegiance_test(self):
+        """
+        Determines whether a defendant owes allegiance to the sovereign based
+        on their citizenship. The method iterates over the list of citizenships
+        and checks each one. If the individual has "dominican" citizenship, 
+        the program must further determine whether the individual is a citizen
+        of Dominica (Commonwealth) or the Dominican Republic (not Commonwealth).
+
+        For "dominican" citizenship, it invokes the _handle_dominican method to handle
+        the special case. For other citizenships, it checks if they are Commonwealth
+        using the _is_commonwealth_citizen method.
+
+        If a Commonwealth citizenship is found, it immediately returns True. If none 
+        of the citizenships are Commonwealth, it returns False. If citizenship list is 
+        empty or not provided, it also returns False.
+
+        Returns:
+            bool: True if the defendant has a Commonwealth citizenship, False otherwise.
+        """
+        
+        if self.citizenship:
+            for i, citizenship in enumerate(self.citizenship):
+                if citizenship.lower() == "dominican":
+                    self.citizenship[i] = self._handle_dominican()
+                    citizenship = self.citizenship[i]  # update citizenship value with new string
+
+                if self._is_commonwealth_citizen(citizenship):
+                    return True
+            return False
+        else:
+            return False
+
+    def _is_commonwealth_citizen(self, citizenship):
+        """
+        This is a private method that checks if a given citizenship belongs to a 
+        Commonwealth country.
+
+        Args:
+            citizenship (str): The citizenship string to check. This should be a 
+            lowercase string that denotes a country or its demonym.
+
+        Returns:
+            bool: True if the citizenship is in the list of Commonwealth countries 
+            or demonyms, False otherwise.
+
+        Note:
+            This method assumes that `COMMONWEALTH_DEMONYMS` is a dictionary 
+            available in the global scope, where the keys are countries and 
+            the values are lists of associated demonyms.
+        """
+        
+        return any(citizenship.lower() in demonyms for demonyms in COMMONWEALTH_DEMONYMS.values())
+
+    def _handle_dominican(self):
+        """
+        This is a private method that checks if a "dominican" citizenship belongs 
+        to the Commonwealth country Dominica or the non-Commonwealth country, 
+        the Dominican Republic.
+
+        Args:
+            index (int): The index of "dominican" citizenship in the citizenship list.
+
+        Returns:
+            None
+        """
+        
+        while True:
+            print("Are you from (1) Dominica or (2) the Dominican Republic?")
+            response = input("Please enter 1 or 2: ").strip()
+            if response == "1":
+                return "dominican commonwealth"
+            elif response == "2":
+                return "dominican not commonwealth"
+            else:
+                print("Invalid input. Please enter 1 or 2.")
+
+```
+
+## Updated main.py functions
+
+```{python}
+def verify_high_treason(matches, facts, defendant):
+    """
+    Determines whether the factual and legal matrix is sufficient to make out 
+    high treason.
+    """
+    
+    reasons = []
+
+    if not matches:
+        reasons.append("* No wrongful act")
+
+    # Check allegiance
+    if not defendant.allegiance_test():
+        reasons.append("* Defendant does not owe allegiance to the sovereign")
+
+    # If defendant doesn't owe allegiance, then we also check for jurisdiction
+    if not defendant.allegiance_test() and facts.jurisdiction == "not recognized":
+        reasons.append("* No jurisdiction")
+
+    # If there are any reasons in the list, print them out. 
+    # Otherwise, high treason has been committed.
+    if reasons:
+        print("High treason not committed:")
+        for reason in reasons:
+            print(reason)
+    else:
+        print("High treason committed. Matches:")
+        for match in matches:
+            print(match)
+
+```
+
 # AI disclaimer
 
 I've used the following AI tools to help create this project:
