@@ -2,6 +2,7 @@
 title: "BSES part 2: adding jurisdictional functionality"
 author: "Daniel Booy"
 date: "2023-07-16"
+date-modified: "2023-07-18"
 categories: [code, bses]
 image: "de_circuit.png"
 
@@ -1163,6 +1164,25 @@ class Defendant:
 ## Updated main.py functions
 
 ```{python}
+def high_treason_rules(facts):
+    """
+    Checks if the facts of the case make out the offence of high treason.
+    """
+    matches = []  # create an empty list to hold matches
+
+    # Check if any of the actions in the facts are in the list of high treason actions
+    for action in facts.actions:
+        complainant_key = action[0] 
+        action_value = action[1]
+
+        if complainant_key in HIGH_TREASON_RULES: # Checks to see if the complainant category lines up with one of the two in HIGH_TREASON RULES
+            tuple_list = HIGH_TREASON_RULES[complainant_key]
+            for item in tuple_list:
+                if action_value == item[1]:
+                    matches.append(item)  # append the matching item to the list
+    return matches  # return the list of matches
+
+
 def verify_high_treason(matches, facts, defendant):
     """
     Determines whether the factual and legal matrix is sufficient to make out 
