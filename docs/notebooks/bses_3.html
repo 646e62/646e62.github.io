@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>informatics.legal - Basic statutory expert system 3 — punishment</title>
+<title>informatics.legal - Basic statutory expert system 3 — case law</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -126,7 +160,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Basic statutory expert system 3 — punishment</h1>
+<h1 class="title">Basic statutory expert system 3 — case law</h1>
 </div>
 
 
@@ -141,14 +175,110 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<p>Punishment for high treason</p>
-<p>47 (1) Every one who commits high treason is guilty of an indictable offence and shall be sentenced to imprisonment for life.</p>
-<p>745 Subject to section 745.1, the sentence to be pronounced against a person who is to be sentenced to imprisonment for life shall be</p>
-<ol type="a">
-<li>in respect of a person who has been convicted of high treason or first degree murder, that the person be sentenced to imprisonment for life without eligibility for parole until the person has served twenty-five years of the sentence;</li>
-</ol>
+<ul>
+<li>Introduce the <code>Case</code>, <code>Journal</code>, and <code>Offence</code> classes and sort out how they relate to each other
+<ul>
+<li>Inter-object dependencies</li>
+<li>Hierarchical relationships</li>
+</ul></li>
+<li>Move the high treason functions into an <code>Offence</code> instance</li>
+<li>Create a <code>Journal</code> instance</li>
+<li>Create a <code>Case</code> instance</li>
+<li></li>
+</ul>
+<section id="models" class="level2">
+<h2 class="anchored" data-anchor-id="models">Models</h2>
+<p>The first step in creating an <code>Offence</code> class is to determine what’s needed to accommodate the offence framework currently contained in the <code>main.py</code> functions.</p>
+<ul>
+<li><code>HIGH_TREASON_RULES</code></li>
+<li><code>high_treason_rules()</code></li>
+<li><code>verify_high_treason()</code></li>
+</ul>
+<div class="cell" data-execution_count="40">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Offence:</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                 offence_name <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                 offence_section <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                 punishment <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                 punishment_section <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                 offence_text <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                 offence_elements <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                 offence_rules <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                 ):</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.offence_name <span class="op">=</span> offence_name</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.offence_section <span class="op">=</span> offence_section</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.punishment <span class="op">=</span> punishment</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.punishment_section <span class="op">=</span> punishment_section</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.offence_text <span class="op">=</span> offence_text</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.offence_elements <span class="op">=</span> offence_elements</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.offence_rules <span class="op">=</span> offence_rules</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-jupyter="{&quot;source_hidden&quot;:true}" data-tags="[]" data-execution_count="37">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cc_s_2_definitions <span class="op">=</span> {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"act"</span>: </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    ((<span class="st">"Act includes</span><span class="ch">\n\t</span><span class="st">(a) an Act of Parliament,"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>      <span class="st">"</span><span class="ch">\n\t</span><span class="st">(b) an Act of the legislature of the former Province of Canada,"</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">"</span><span class="ch">\n\t</span><span class="st">(c) an Act of the legislature of a province, and"</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">"</span><span class="ch">\n\t</span><span class="st">(d) an Act or ordinance of the legislature of a province, territory"</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">" or place in force at the time that province, territory or place became"</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">"a province of Canada."</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>     ), </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>     (<span class="st">"S’entend notamment :</span><span class="ch">\n\t</span><span class="st">a) d’une loi fédérale;"</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>     </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>     )\n\tb) d’une loi de la législature d l’ancienne province du Canada<span class="op">;</span>\n\tc) d’une loi provinciale<span class="op">;</span>\n\td) d’une loi ou ordonnance de la législature d’une province, d’un territoire ou d’un endroit, en vigueur au moment où cette province, ce territoire ou cet endroit est devenu une province du Canada.<span class="st">", "</span>loi<span class="st">"),</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="er">    "appearance notice": </span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"appearance notice means a notice in Form 9 issued </span><span class="ch">\</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="st">    by a peace officer."</span>, <span class="st">"Citation selon la formule 9, délivrée par un agent </span><span class="ch">\</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="st">    de la paix."</span>, <span class="st">"citation à comparaître"</span>),</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"associated personnel"</span>: </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"associated personnel means persons who are</span><span class="ch">\n\t\</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="st">    (a) assigned by a government or an intergovernmental organization with the</span><span class="ch">\</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="st">     agreement of the competent organ of the United Nations,</span><span class="ch">\n\t</span><span class="st">(b) engaged by</span><span class="ch">\</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="st">     the Secretary-General of the United Nations, by a specialized agency of </span><span class="ch">\</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="st">     the United Nations or by the International Atomic Energy Agency, or</span><span class="ch">\n\t\</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="st">    (c) deployed by a humanitarian non-governmental organization or agency </span><span class="ch">\</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="st">    under an agreement with the Secretary-General of the United Nations, by a </span><span class="ch">\</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="st">    specialized agency of the United Nations or by the International Atomic </span><span class="ch">\</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="st">    Energy Agency,</span><span class="ch">\n</span><span class="st">to carry out activities in support of the fulfilment of </span><span class="ch">\</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="st">    the mandate of a United Nations operation"</span>, <span class="st">"Les personnes ci-après qui </span><span class="ch">\</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="st">    exercent des activités dans le cadre d’une opération des Nations Unies :</span><span class="ch">\</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="st">    </span><span class="ch">\n\t</span><span class="st">a) les personnes affectées par un gouvernement ou une organisation </span><span class="ch">\</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="st">    intergouvernementale avec l’accord de l’organe compétent de l’Organisation</span><span class="ch">\</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="st">     des Nations Unies;</span><span class="ch">\n\t</span><span class="st">b) les personnes engagées par le Secrétaire général</span><span class="ch">\</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="st">     de l’Organisation des Nations Unies, par une institution spécialisée de </span><span class="ch">\</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="st">    cette organisation ou par l’Agence internationale de l’énergie atomique; </span><span class="ch">\</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="st">    </span><span class="ch">\n\t</span><span class="st">c) les personnes affectées par une organisation non gouvernementale </span><span class="ch">\</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="st">    humanitaire en vertu d’un accord avec le Secrétaire général de </span><span class="ch">\</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="st">    l’Organisation des Nations Unies, par une institution spécialisée de cette</span><span class="ch">\</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="st">     organisation ou par l’Agence internationale de l’énergie atomique."</span>, </span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    <span class="st">"personnel associé"</span>),</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">"attorney general"</span>: </span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"(a) with respect to proceedings to which this Act applies, means the </span><span class="ch">\</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="st">    Attorney General or Solicitor General of the province in which those </span><span class="ch">\</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="st">    proceedings are taken and includes his or her lawful deputy or, if those </span><span class="ch">\</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="st">    proceedings are referred to in subsection 2.3(1), the Attorney General of </span><span class="ch">\</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="st">    Canada or the Attorney General or Solicitor General of the province in </span><span class="ch">\</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="st">    which those proceedings are taken and includes the lawful deputy of any of</span><span class="ch">\</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="st">     them,</span><span class="ch">\n\t</span><span class="st">(b) means the Attorney General of Canada and includes his or her</span><span class="ch">\</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="st">     lawful deputy with respect to</span><span class="ch">\n\t\t</span><span class="st">(i) Yukon, the Northwest Territories </span><span class="ch">\</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="st">    and Nunavut, or</span><span class="ch">\n\t\t</span><span class="st">(ii) proceedings commenced at the instance of the </span><span class="ch">\</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="st">    Government of Canada and conducted by or on behalf of that Government in </span><span class="ch">\</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="st">    respect of an offence under any Act of Parliament — other than this Act or</span><span class="ch">\</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="st">     the Canada Elections Act — or any regulation made under such an Act, and</span><span class="ch">\</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="st">    </span><span class="ch">\n\t</span><span class="st">(c) means the Director of Public Prosecutions appointed under </span><span class="ch">\</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="st">    subsection 3(1) of the Director of Public Prosecutions Act with respect to</span><span class="ch">\</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="st">     proceedings in relation to an offence under the Canada Elections Act;"</span>,),</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
