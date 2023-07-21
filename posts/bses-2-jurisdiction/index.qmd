@@ -646,7 +646,7 @@ The final step is to code a function that will check to determine whether there 
     * Is the offence treason?
         * Does the defendant owe allegiance to Canada?
 
-The ```verify_high_treason()``` function determines whether the offence is made out. The previous ```verify_high_treason()``` function simply checked to see if ```matches``` had any content. If it did, it would print them out. But jurisdiction introduces a new issue: we can't say a defendant committed high treason unless we also establish that the offence occurred *in Canada*. We must expand ``verify_high_treason()```'s scope to do this. For now, this function is class-independent.[^offence_jurisdiction]
+The ```verify_high_treason()``` function determines whether the offence is made out. The previous ```verify_high_treason()``` function simply checked to see if ```matches``` had any content. If it did, it would print them out. But jurisdiction introduces a new issue: we can't say a defendant committed high treason unless we also establish that the offence occurred *in Canada*. We must expand ```verify_high_treason()```'s scope to do this. For now, this function is class-independent.[^offence_jurisdiction]
 
 ```{python}
 def verify_high_treason(matches, facts, defendant):
