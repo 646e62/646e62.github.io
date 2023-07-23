@@ -93,6 +93,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-0BZLRDQ9RH"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-0BZLRDQ9RH', { 'anonymize_ip': true});
+</script>
 
 
 <link rel="stylesheet" href="../styles.css">
@@ -188,10 +197,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <section id="models" class="level2">
 <h2 class="anchored" data-anchor-id="models">Models</h2>
-<p>The first step in creating an <code>Offence</code> class is to determine what’s needed to accommodate the offence framework currently contained in the <code>main.py</code> functions.</p>
+<p>The first step in creating an <code>Offence</code> class is to determine what’s needed to accommodate the offence framework currently contained in the <code>main.py</code> functions. These include:</p>
 <ul>
 <li><code>HIGH_TREASON_RULES</code></li>
+<li><code>high_treason_rules()</code></li>
+<li><code>verify_high_treason()</code></li>
 </ul>
+<section id="high_treason_rules" class="level3">
+<h3 class="anchored" data-anchor-id="high_treason_rules"><code>HIGH_TREASON_RULES</code></h3>
+<p>This constant contains both the questions needed to create the factual matrix required and indexable values associated with the answers to those questions. <code>high_treason_rules()</code> reads those values.</p>
+</section>
+<section id="high_treason_rules-1" class="level3">
+<h3 class="anchored" data-anchor-id="high_treason_rules-1"><code>high_treason_rules()</code></h3>
 <div class="cell" data-execution_count="40">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Offence:</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    </span>
@@ -276,6 +293,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
