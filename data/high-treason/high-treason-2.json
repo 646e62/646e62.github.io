@@ -1,0 +1,26 @@
+{
+    "universal elements": {
+        "offence": "high treason",
+        "statute": ["46", "1", "b"],
+        "datetime": [false, ["necessary"]],
+        "jurisdiction": [false, ["necessary"]],
+        "identity": [false, ["necessary"]],
+        "liability": [false, ["necessary"]]
+    },
+    "existential elements": {
+        "levy war canada": [
+            {
+                "defendant levied war": false,
+                "canada is target": false
+            },
+            ["sufficient"]
+        ],
+        "prepare levy war canada": [
+            {
+                "defendant prepared to levy war": false,
+                "canada is target": false
+            },
+            ["sufficient"]
+        ]
+    }
+}
