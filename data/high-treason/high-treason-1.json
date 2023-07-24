@@ -1,0 +1,70 @@
+{
+    "universal elements": {
+        "offence": "high treason",
+        "statute": ["46", "1", "a"],
+        "datetime": [false, ["necessary"]],
+        "jurisdiction": [false, ["necessary"]],
+        "identity": [false, ["necessary"]],
+        "liability": [false, ["necessary"]]
+    },
+    "existential elements": {
+        "kill sovereign": [
+            {
+                "defendant killed victim": false,
+                "sovereign is victim": false
+            },
+            ["sufficient"]
+        ],
+        "attempt kill sovereign": [
+            {
+                "defendant attempted to kill victim": false,
+                "sovereign is victim": false
+            },
+            ["sufficient"]
+        ],
+        "bodily harm tending to cause death sovereign": [
+            {
+                "defendant caused victim bodily harm": false,
+                "sovereign is victim": false,
+                "bodily harm tends to cause death": false
+            },
+            ["sufficient"]
+        ],
+        "bodily harm tending to cause destruction sovereign": [
+            {
+                "defendant caused victim bodily harm": false,
+                "sovereign is victim": false,
+                "bodily harm tends to cause destruction": false
+            },
+            ["sufficient"]
+        ],
+        "maim sovereign": [
+            {
+                "defendant maimed victim": false,
+                "sovereign is victim": false
+            },
+            ["sufficient"]
+        ],
+        "wound sovereign": [
+            {
+                "defendant wound victim": false,
+                "sovereign is victim": false
+            },
+            ["sufficient"]
+        ],
+        "imprison sovereign": [
+            {
+                "defendant imprison victim": false,
+                "sovereign is victim": false
+            },
+            ["sufficient"]
+        ],
+        "restrain sovereign": [
+            {
+                "defendant restrain victim": false,
+                "sovereign is victim": false
+            },
+            ["sufficient"]
+        ]
+    }
+}

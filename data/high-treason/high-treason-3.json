@@ -1,0 +1,28 @@
+{
+    "universal elements": {
+        "offence": "high treason",
+        "statute": ["46", "1", "c"],
+        "datetime": [false, ["necessary"]],
+        "jurisdiction": [false, ["necessary"]],
+        "identity": [false, ["necessary"]],
+        "liability": [false, ["necessary"]]
+    },
+    "existential elements": {
+        "assist enemy at war with canada": [
+            {
+                "defendant assisted enemy": false,
+                "enemy at war": false,
+                "canada is target": false
+            },
+            ["sufficient"]
+        ],
+        "assist hostile force engaged with canadian forces": [
+            {
+                "defendant assisted hostile force": false,
+                "hostile force engaged": false,
+                "canadian forces are target": false
+            },
+            ["sufficient"]
+        ]
+    }
+}
